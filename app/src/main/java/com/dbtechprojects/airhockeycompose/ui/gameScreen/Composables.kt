@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
@@ -44,13 +45,27 @@ fun GameBorder() {
             .fillMaxSize()
     )
     {
+
        Column() {
-           Canvas(modifier = Modifier.fillMaxSize().padding(20.dp)){
+           Canvas(modifier = Modifier
+               .fillMaxSize()
+               .padding(20.dp)){
                val height = this.size.height
                val width = this.size.width
 
                 drawBorder(height, width)
            }
        }
+        GameMenu()
+    }
+}
+
+@Composable
+fun GameMenu () {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(20.dp)
+        .background(color = Color(0f, 0f, 0f, 0.6f), shape = RectangleShape,) ){
+
     }
 }
