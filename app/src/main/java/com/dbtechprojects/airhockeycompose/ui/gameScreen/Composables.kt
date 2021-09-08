@@ -9,7 +9,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,13 @@ fun GameBorder() {
             .fillMaxSize()
     )
     {
-        Canvas(modifier = Modifier.fillMaxSize(), onDraw = )
+       Column() {
+           Canvas(modifier = Modifier.fillMaxSize().padding(20.dp)){
+               val height = this.size.height
+               val width = this.size.width
+
+                drawBorder(height, width)
+           }
+       }
     }
 }
