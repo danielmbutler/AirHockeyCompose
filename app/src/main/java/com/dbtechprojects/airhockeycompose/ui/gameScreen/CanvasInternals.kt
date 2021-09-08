@@ -1,19 +1,15 @@
 package com.dbtechprojects.airhockeycompose.ui.gameScreen
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 fun DrawScope.drawBorder(height: Float, width: Float) {
     val gameBorder = Path()
-    val gameBorderRight = Path()
 
     gameBorder.apply {
         lineTo(width / 3.5f, 0f)
