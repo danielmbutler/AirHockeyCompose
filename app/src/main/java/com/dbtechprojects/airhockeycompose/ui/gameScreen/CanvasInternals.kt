@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
-fun DrawScope.drawBorder(height: Float, width: Float) {
+fun DrawScope.drawGameBoard(height: Float, width: Float) {
     val gameBorder = Path()
 
     gameBorder.apply {
@@ -62,23 +62,4 @@ fun DrawScope.drawBorder(height: Float, width: Float) {
         style = Stroke(width = 6f, pathEffect =PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f) )
     )
 
-    // ball
-    drawCircle(
-        color = Color.Black,
-        radius = 40f,
-        center = Offset(width/2, height/2),
-
-    )
-
-    // pucks
-    drawCircle(
-        color = Color.Red,
-        radius = 100f,
-        center = Offset(width/2, 100f),
-    )
-    drawCircle(
-        color = Color.Blue,
-        radius = 100f,
-        center = Offset(width/2, height - 100f),
-    )
 }
