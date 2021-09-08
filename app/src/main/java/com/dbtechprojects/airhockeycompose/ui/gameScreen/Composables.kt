@@ -2,6 +2,7 @@ package com.dbtechprojects.airhockeycompose.ui.gameScreen
 
 
 import android.util.Log
+import android.util.Range
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,8 +43,8 @@ fun GameTitle(text: String) {
 
 @Composable
 fun GameBorder(gameModeState: MutableState<Boolean>) {
-    var offsetX by remember { mutableStateOf(500f) }
-    var offsetY by remember { mutableStateOf(1800f) }
+    var offsetX by remember { mutableStateOf(450f) }
+    var offsetY by remember { mutableStateOf(1780f) }
 
     Box(
         Modifier
@@ -66,23 +67,39 @@ fun GameBorder(gameModeState: MutableState<Boolean>) {
                          */
                         detectDragGestures { change, dragAmount ->
                             change.consumeAllChanges()
-                            if (offsetX < 805f && offsetX > 160f ){
-                                //player is within boundary so update location
-                                offsetX += dragAmount.x
-                            } else if ( offsetX > 805f && dragAmount.x < 0){
-                                // player is almost at the right most edge of boundary so only accept drags to the left
-                                offsetX+= dragAmount.x
-                            } else if (offsetX < 160f && dragAmount.x > 0){
-                                // player is almost at the left most edge of boundary so only accept drags to the right
-                                offsetX += dragAmount.x
-                            }
+                            // these range conditions confirm that the finger is placed within 100f of the players puck
+                            if (Range
+                                    .create(offsetX - 100f, offsetX + 100f)
+                                    .contains(change.position.x) && Range
+                                    .create(
+                                        offsetY - 100f,
+                                        offsetY + 100f
+                                    )
+                                    .contains(change.position.y)
+                            ) {
+                                if (offsetX < 805f && offsetX > 160f) {
+                                    //player is within boundary so update location
+                                    offsetX += dragAmount.x
+                                } else if (offsetX > 805f && dragAmount.x < 0) {
+                                    // player is almost at the right most edge of boundary so only accept drags to the left
+                                    offsetX += dragAmount.x
+                                } else if (offsetX < 160f && dragAmount.x > 0) {
+                                    // player is almost at the left most edge of boundary so only accept drags to the right
+                                    offsetX += dragAmount.x
+                                }
 
-                            offsetY += dragAmount.y
-                            Log.d("Offset y", offsetY.toString())
-                            Log.d("Offset x", offsetX.toString())
-                            Log.d("drag y", dragAmount.y.toString())
-                            Log.d("drag x", dragAmount.x.toString())
-                            Log.d("change", change.type.toString())
+                                // handle Vertical dragging
+                                if (offsetY > 1050f && offsetY < 1790f) {
+                                    offsetY += dragAmount.y
+                                }
+                                else if (offsetY > 1790f && dragAmount.y < 0) {
+                                    offsetY += dragAmount.y
+                                }
+                                else if (offsetY < 1050f && dragAmount.y > 0) {
+                                    offsetY += dragAmount.y
+                                }
+
+                            }
                         }
                     }
             ) {
@@ -95,14 +112,14 @@ fun GameBorder(gameModeState: MutableState<Boolean>) {
                 drawCircle(
                     color = Color.Black,
                     radius = 40f,
-                    center = Offset(width/2, height/2),
+                    center = Offset(width / 2, height / 2),
 
                     )
                 // pucks
                 drawCircle(
                     color = Color.Red,
                     radius = 100f,
-                    center = Offset(width/2, 100f),
+                    center = Offset(width / 2, 100f),
                 )
                 //Offset(width/2, height - 100f),
                 drawCircle(
@@ -134,22 +151,28 @@ fun GameMenu(onGameButtonClick: () -> Unit) {
         ) {
             Column() {
 
-                Button(onClick = {  onGameButtonClick.invoke() },
+                Button(
+                    onClick = { onGameButtonClick.invoke() },
                     Modifier
                         .padding(10.dp)
-                        .width(180.dp)) {
+                        .width(180.dp)
+                ) {
                     Text(text = "Single Player Local")
                 }
-                Button(onClick = { onGameButtonClick.invoke() },
+                Button(
+                    onClick = { onGameButtonClick.invoke() },
                     Modifier
                         .padding(10.dp)
-                        .width(180.dp)) {
+                        .width(180.dp)
+                ) {
                     Text(text = "Two Player Local")
                 }
-                Button(onClick = { onGameButtonClick.invoke() },
+                Button(
+                    onClick = { onGameButtonClick.invoke() },
                     Modifier
                         .padding(10.dp)
-                        .width(180.dp)) {
+                        .width(180.dp)
+                ) {
                     Text(text = "Two Player Online")
                 }
             }
