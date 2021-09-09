@@ -66,6 +66,8 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     var rightCollisionMovement by remember {
         mutableStateOf(false)
     }
+
+
     val ballMovementYAxis by animateFloatAsState(
         targetValue =
         when {
@@ -75,10 +77,18 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
             upCollisionMovement -> {
                 ballOffsetY - 950f
             }
+            leftCollisionMovement -> {
+                ballOffsetY - 800f
+            }
+            rightCollisionMovement -> {
+                ballOffsetY - 800f
+            }
+
             else -> ballOffsetY
         },
         animationSpec = tween(3000, easing = LinearEasing),
         finishedListener = {
+
         }
     )
     val ballMovementXAxis by animateFloatAsState(
@@ -88,7 +98,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 ballOffsetX - 650f
             }
             rightCollisionMovement -> {
-                ballOffsetX + 650
+                ballOffsetX + 650f
             }
             else -> ballOffsetX
         },
@@ -119,18 +129,24 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 ballMovementXAxis > 805f
 
     val rightCollision: Boolean =
+    // ball has hit player right side side
+            Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
+                .contains(playerOneOffsetX) &&
+            Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
+                .contains(playerOneOffsetY) ||
         // ball has hit left border
         ballMovementXAxis < 100f
 
-    Log.d(
-        "GameBoard",
-        "left collision : $leftCollision, upcollision $upCollision, downcollision: $downCollision"
-    )
-
 //    Log.d(
-//        "GameBoard", "playerXOffset: $playerOneOffsetX playerYOffset: ${playerOneOffsetY}," +
-//                " ballOffsetX ${ballMovementXAxis}, ballOffsetY ${ballMovementYAxis}, collision: $upCollision"
+//        "GameBoard",
+//        "left collision : $leftCollisionMovement, upcollision $upCollisionMovement, downcollision: $downCollisionMovement" +
+//                "right collision $rightCollisionMovement"
 //    )
+
+    Log.d(
+        "GameBoard", "playerXOffset: $playerOneOffsetX playerYOffset: ${playerOneOffsetY}," +
+                " ballOffsetX ${ballMovementXAxis}, ballOffsetY ${ballMovementYAxis}, collision: $upCollision"
+    )
 //    Log.d("GameBoard", "up collision : $upCollisionMovement, down collision $downCollisionMovement, right collision $rightCollisionMovement" +
 //            "left collision : $leftCollisionMovement")
 ////    Log.d(
@@ -152,16 +168,16 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
         rightCollisionMovement = false
     }
     if (leftCollision) {
-        leftCollisionMovement = true
         upCollisionMovement = false
         downCollisionMovement = false
         rightCollisionMovement = false
+        leftCollisionMovement = true
     }
     if (rightCollision) {
-        rightCollisionMovement = true
         leftCollisionMovement = false
         upCollisionMovement = false
         downCollisionMovement = false
+        rightCollisionMovement = true
     }
 
     Box(
