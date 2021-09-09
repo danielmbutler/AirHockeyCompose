@@ -76,6 +76,12 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     var player2GoalCount by remember {
         mutableStateOf(0)
     }
+    var player1Goal by remember {
+        mutableStateOf(false)
+    }
+    var player2Goal by remember {
+        mutableStateOf(false)
+    }
 
 
     val ballMovementYAxis by animateFloatAsState(
@@ -103,7 +109,8 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
         finishedListener = {
             if (goalCollisionMovement){
                 goalCollisionMovement = false
-                player1GoalCount += 1
+                if(player1Goal) player1GoalCount += 1
+                if (player2Goal) player2GoalCount += 1
             }
         }
     )
@@ -184,13 +191,13 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                     .contains(playerOneOffsetY) ||
                 // ball has hit left border
                 ballMovementXAxis < 100f
-    val player1goal: Boolean =
+    val player1goalCheck: Boolean =
         // top goal
         ballMovementYAxis < playerTwoStartOffsetY &&
                 Range.create(playerTwoStartOffsetX - 50f, playerTwoStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
         // bottom goal
-    val player2goal : Boolean =
+    val player2goalCheck : Boolean =
         (ballMovementYAxis > playerOneStartOffsetY + 100f) &&
                 Range.create(playerOneStartOffsetX - 50f, playerOneStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
@@ -208,14 +215,21 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
 //                " ballOffsetX ${ballOffsetX}, ballOffsetY ${ballOffsetY}, collision: $downCollision"
 //    )
 
-    if (player1goal || player2goal) {
+    if (player1goalCheck || player2goalCheck) {
         Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
         upCollisionMovement = false
         downCollisionMovement = false
         leftCollisionMovement = false
         rightCollisionMovement = false
         goalCollisionMovement = true
-
+        if (player1goalCheck){
+            player1Goal = true
+            player2Goal = false
+        }
+        if(player2goalCheck){
+            player2Goal = true
+            player1Goal = false
+        }
     }
 
     if (upCollision && !goalCollisionMovement) {
