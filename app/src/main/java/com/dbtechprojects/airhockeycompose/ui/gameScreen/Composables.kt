@@ -16,14 +16,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineStart
 
 @Composable
 fun GameTitle(text: String) {
@@ -46,12 +48,12 @@ fun GameTitle(text: String) {
 @Composable
 fun GameBoard(gameModeState: MutableState<Boolean>) {
     // setting out initial positions
-    var playerOneOffsetX by remember { mutableStateOf(461f) }
-    var playerOneOffsetY by remember { mutableStateOf(1780f) }
-    val playerTwoOffsetX by remember { mutableStateOf(461f) }
-    val playerTwoOffsetY by remember { mutableStateOf(100f) }
-    val ballOffsetX by remember { mutableStateOf(461f) }
-    val ballOffsetY by remember { mutableStateOf(958f) }
+    var playerOneStartOffsetX by remember { mutableStateOf(461f) }
+    var playerOneStartOffsetY by remember { mutableStateOf(1780f) }
+    val playerTwoStartOffsetX by remember { mutableStateOf(461f) }
+    val playerTwoStartOffsetY by remember { mutableStateOf(100f) }
+    val ballStartOffsetX by remember { mutableStateOf(461f) }
+    val ballStartOffsetY by remember { mutableStateOf(958f) }
 
     // defining collision types
     var upCollisionMovement by remember {
@@ -66,76 +68,129 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     var rightCollisionMovement by remember {
         mutableStateOf(false)
     }
+    var goalCollisionMovement by remember {
+        mutableStateOf(false)
+    }
+    var player1GoalCount by remember {
+        mutableStateOf(0)
+    }
+    var player2GoalCount by remember {
+        mutableStateOf(0)
+    }
 
 
     val ballMovementYAxis by animateFloatAsState(
         targetValue =
         when {
             downCollisionMovement -> {
-                ballOffsetY + 800f
+                ballStartOffsetY + 800f
             }
             upCollisionMovement -> {
-                ballOffsetY - 950f
+                ballStartOffsetY - 1700f
             }
             leftCollisionMovement -> {
-                ballOffsetY - 800f
+                ballStartOffsetY - 900f
             }
             rightCollisionMovement -> {
-                ballOffsetY - 800f
+                ballStartOffsetY - 900f
+            }
+            goalCollisionMovement -> {
+                ballStartOffsetY
             }
 
-            else -> ballOffsetY
+            else -> ballStartOffsetY
         },
-        animationSpec = tween(3000, easing = LinearEasing),
+        animationSpec = tween(850, easing = LinearEasing),
         finishedListener = {
-
+            if (goalCollisionMovement){
+                goalCollisionMovement = false
+                player1GoalCount += 1
+            }
         }
     )
     val ballMovementXAxis by animateFloatAsState(
         targetValue =
         when {
             leftCollisionMovement -> {
-                ballOffsetX - 650f
+                ballStartOffsetX - 650f
             }
             rightCollisionMovement -> {
-                ballOffsetX + 650f
+                ballStartOffsetX + 650f
             }
-            else -> ballOffsetX
+            else -> ballStartOffsetX
         },
-        animationSpec = tween(3000, easing = LinearEasing),
-        finishedListener = {
-        }
+        animationSpec = tween(1000, easing = LinearEasing),
+
+        )
+
+    val player2MovementXAxis by animateFloatAsState(
+        targetValue = when {
+            gameModeState.value -> {
+                ballMovementXAxis
+            }
+            else -> playerTwoStartOffsetX
+        },
+        animationSpec = tween(4000, easing = LinearEasing)
     )
+
+    val player2MovementYAxis by animateFloatAsState(
+        targetValue = when {
+            downCollisionMovement -> {
+                ballStartOffsetY // center line
+            }
+            else -> {
+                playerTwoStartOffsetY
+            }
+        },
+        animationSpec = tween(4000, easing = LinearEasing)
+    )
+
 
     // define collision checks
 
     val upCollision: Boolean =
+        // ball has hit player one
         Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 100f)
-            .contains(playerOneOffsetX) &&
-                Range.create(ballMovementYAxis, ballMovementYAxis + 120f).contains(playerOneOffsetY)
+            .contains(playerOneStartOffsetX) &&
+                Range.create(ballMovementYAxis, ballMovementYAxis + 120f)
+                    .contains(playerOneStartOffsetY)
     val downCollision: Boolean =
-        Range.create(ballMovementXAxis - 150f, ballMovementXAxis + 150f)
-            .contains(playerTwoOffsetX) &&
-                Range.create(ballMovementYAxis - 150f, ballMovementYAxis + 150f)
-                    .contains(playerTwoOffsetY)
+        // ball has hit player 2
+        Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 100f)
+            .contains(player2MovementXAxis) &&
+                Range.create(ballMovementYAxis - 80f, ballMovementYAxis + 150f)
+                    .contains(player2MovementYAxis) ||
+                //ball has hit top border
+                ballMovementXAxis < (ballStartOffsetX - 150f) &&
+                Range.create(playerTwoStartOffsetY - 100f, playerTwoStartOffsetY)
+                    .contains(ballMovementYAxis) || // if ball is higher than the starting position of player 2 then we know its at the top
+                ballMovementXAxis > (ballStartOffsetX + 150f) &&
+                Range.create(playerTwoStartOffsetY - 100f, playerTwoStartOffsetY + 100f)
+                    .contains(ballMovementYAxis)
 
     val leftCollision: Boolean =
         // ball has hit player left side
         Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 200f)
-            .contains(playerOneOffsetX) &&
+            .contains(playerOneStartOffsetX) &&
                 Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
-                    .contains(playerOneOffsetY) ||
+                    .contains(playerOneStartOffsetY) ||
                 // ball has hit right border
                 ballMovementXAxis > 805f
 
     val rightCollision: Boolean =
-    // ball has hit player right side side
-            Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
-                .contains(playerOneOffsetX) &&
-            Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
-                .contains(playerOneOffsetY) ||
-        // ball has hit left border
-        ballMovementXAxis < 100f
+        // ball has hit player right side side
+        Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
+            .contains(playerOneStartOffsetX) &&
+                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
+                    .contains(playerOneStartOffsetY) ||
+                // ball has hit left border
+                ballMovementXAxis < 100f
+    val goal: Boolean =
+        // top goal
+        Range.create(playerTwoStartOffsetY - 100f, playerTwoStartOffsetY)
+            .contains(ballMovementYAxis) &&
+                Range.create(playerTwoStartOffsetX - 50f, playerTwoStartOffsetX + 50f)
+                    .contains(ballMovementXAxis)
 
 //    Log.d(
 //        "GameBoard",
@@ -144,7 +199,8 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
 //    )
 
     Log.d(
-        "GameBoard", "playerXOffset: $playerOneOffsetX playerYOffset: ${playerOneOffsetY}," +
+        "GameBoard",
+        "playerXOffset: $playerOneStartOffsetX playerYOffset: ${playerOneStartOffsetY}," +
                 " ballOffsetX ${ballMovementXAxis}, ballOffsetY ${ballMovementYAxis}, collision: $upCollision"
     )
 //    Log.d("GameBoard", "up collision : $upCollisionMovement, down collision $downCollisionMovement, right collision $rightCollisionMovement" +
@@ -154,31 +210,42 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
 //                " ballOffsetX ${ballOffsetX}, ballOffsetY ${ballOffsetY}, collision: $downCollision"
 //    )
 
-    if (upCollision) {
+    if (goal) {
+        Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
+        upCollisionMovement = false
+        downCollisionMovement = false
+        leftCollisionMovement = false
+        rightCollisionMovement = false
+        goalCollisionMovement = true
+
+    }
+
+    if (upCollision && !goalCollisionMovement) {
         upCollisionMovement = true
         downCollisionMovement = false
         leftCollisionMovement = false
         rightCollisionMovement = false
 
     }
-    if (downCollision) {
+    if (downCollision && !goalCollisionMovement) {
         downCollisionMovement = true
         upCollisionMovement = false
         leftCollisionMovement = false
         rightCollisionMovement = false
     }
-    if (leftCollision) {
+    if (leftCollision && !goalCollisionMovement) {
         upCollisionMovement = false
         downCollisionMovement = false
         rightCollisionMovement = false
         leftCollisionMovement = true
     }
-    if (rightCollision) {
+    if (rightCollision && !goalCollisionMovement) {
         leftCollisionMovement = false
         upCollisionMovement = false
         downCollisionMovement = false
         rightCollisionMovement = true
     }
+
 
     Box(
         Modifier
@@ -189,6 +256,9 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     {
 
         Column() {
+            // paint object o use to write scores
+
+            val paint = Paint().asFrameworkPaint()
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
@@ -203,32 +273,35 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                             change.consumeAllChanges()
                             // these range conditions confirm that the finger is placed within 100f of the players puck
                             if (Range
-                                    .create(playerOneOffsetX - 100f, playerOneOffsetX + 100f)
+                                    .create(
+                                        playerOneStartOffsetX - 100f,
+                                        playerOneStartOffsetX + 100f
+                                    )
                                     .contains(change.position.x) && Range
                                     .create(
-                                        playerOneOffsetY - 100f,
-                                        playerOneOffsetY + 100f
+                                        playerOneStartOffsetY - 100f,
+                                        playerOneStartOffsetY + 100f
                                     )
                                     .contains(change.position.y)
                             ) {
-                                if (playerOneOffsetX < 805f && playerOneOffsetX > 160f) {
+                                if (playerOneStartOffsetX < 805f && playerOneStartOffsetX > 160f) {
                                     //player is within boundary so update location
-                                    playerOneOffsetX += dragAmount.x
-                                } else if (playerOneOffsetX > 805f && dragAmount.x < 0) {
+                                    playerOneStartOffsetX += dragAmount.x
+                                } else if (playerOneStartOffsetX > 805f && dragAmount.x < 0) {
                                     // player is almost at the right most edge of boundary so only accept drags to the left
-                                    playerOneOffsetX += dragAmount.x
-                                } else if (playerOneOffsetX < 160f && dragAmount.x > 0) {
+                                    playerOneStartOffsetX += dragAmount.x
+                                } else if (playerOneStartOffsetX < 160f && dragAmount.x > 0) {
                                     // player is almost at the left most edge of boundary so only accept drags to the right
-                                    playerOneOffsetX += dragAmount.x
+                                    playerOneStartOffsetX += dragAmount.x
                                 }
 
                                 // handle Vertical dragging
-                                if (playerOneOffsetY > 1050f && playerOneOffsetY < 1790f) {
-                                    playerOneOffsetY += dragAmount.y
-                                } else if (playerOneOffsetY > 1790f && dragAmount.y < 0) {
-                                    playerOneOffsetY += dragAmount.y
-                                } else if (playerOneOffsetY < 1050f && dragAmount.y > 0) {
-                                    playerOneOffsetY += dragAmount.y
+                                if (playerOneStartOffsetY > 1050f && playerOneStartOffsetY < 1790f) {
+                                    playerOneStartOffsetY += dragAmount.y
+                                } else if (playerOneStartOffsetY > 1790f && dragAmount.y < 0) {
+                                    playerOneStartOffsetY += dragAmount.y
+                                } else if (playerOneStartOffsetY < 1050f && dragAmount.y > 0) {
+                                    playerOneStartOffsetY += dragAmount.y
                                 }
 
                             }
@@ -251,19 +324,42 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 drawCircle(
                     color = Color.Red,
                     radius = 100f,
-                    center = Offset(playerTwoOffsetX, playerTwoOffsetY),
+                    center = Offset(player2MovementXAxis, player2MovementYAxis),
                 )
                 Log.d("player 2 pos", "x: ${width / 2} y: 100f")
                 //Offset(width/2, height - 100f),
                 drawCircle(
                     color = Color.Blue,
                     radius = 100f,
-                    center = Offset(playerOneOffsetX, playerOneOffsetY)
+                    center = Offset(playerOneStartOffsetX, playerOneStartOffsetY)
                 )
+
+                // scores
+                paint.apply {
+                    isAntiAlias = true
+                    textSize = 100f
+                    typeface = android.graphics.Typeface.DEFAULT
+                }
+
+                drawContext.canvas.nativeCanvas.drawText(
+                    player2GoalCount.toString(),
+                    100f,
+                    height / 2 - 200f,
+                    paint
+                )
+                drawContext.canvas.nativeCanvas.drawText(
+                    player1GoalCount.toString(),
+                    100f,
+                    height / 2 + 200f,
+                    paint
+                )
+
             }
         }
         if (!gameModeState.value) {
-            GameMenu { gameModeState.value = true }
+            GameMenu {
+                gameModeState.value = true
+            }
         }
     }
 }
