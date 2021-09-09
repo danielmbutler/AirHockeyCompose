@@ -17,15 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineStart
 
 @Composable
 fun GameTitle(text: String) {
@@ -50,6 +47,8 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     // setting out initial positions
     var playerOneStartOffsetX by remember { mutableStateOf(461f) }
     var playerOneStartOffsetY by remember { mutableStateOf(1780f) }
+    var playerOneOffsetX by remember { mutableStateOf(461f) }
+    var playerOneOffsetY by remember { mutableStateOf(1780f) }
     val playerTwoStartOffsetX by remember { mutableStateOf(461f) }
     val playerTwoStartOffsetY by remember { mutableStateOf(100f) }
     val ballStartOffsetX by remember { mutableStateOf(461f) }
@@ -83,7 +82,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
         targetValue =
         when {
             downCollisionMovement -> {
-                ballStartOffsetY + 800f
+                ballStartOffsetY + 1850f
             }
             upCollisionMovement -> {
                 ballStartOffsetY - 1700f
@@ -151,9 +150,9 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     val upCollision: Boolean =
         // ball has hit player one
         Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 100f)
-            .contains(playerOneStartOffsetX) &&
+            .contains(playerOneOffsetX) &&
                 Range.create(ballMovementYAxis, ballMovementYAxis + 120f)
-                    .contains(playerOneStartOffsetY)
+                    .contains(playerOneOffsetY)
     val downCollision: Boolean =
         // ball has hit player 2
         Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 100f)
@@ -171,41 +170,35 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     val leftCollision: Boolean =
         // ball has hit player left side
         Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 200f)
-            .contains(playerOneStartOffsetX) &&
+            .contains(playerOneOffsetX) &&
                 Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
-                    .contains(playerOneStartOffsetY) ||
+                    .contains(playerOneOffsetY) ||
                 // ball has hit right border
                 ballMovementXAxis > 805f
 
     val rightCollision: Boolean =
         // ball has hit player right side side
         Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
-            .contains(playerOneStartOffsetX) &&
+            .contains(playerOneOffsetX) &&
                 Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
-                    .contains(playerOneStartOffsetY) ||
+                    .contains(playerOneOffsetY) ||
                 // ball has hit left border
                 ballMovementXAxis < 100f
     val player1goal: Boolean =
         // top goal
-        Range.create(playerTwoStartOffsetY - 100f, playerTwoStartOffsetY)
-            .contains(ballMovementYAxis) &&
+        ballMovementYAxis < playerTwoStartOffsetY &&
                 Range.create(playerTwoStartOffsetX - 50f, playerTwoStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
         // bottom goal
     val player2goal : Boolean =
-        Range.create(playerOneStartOffsetY - 100f, playerOneStartOffsetY)
-            .contains(ballMovementYAxis) &&
+        (ballMovementYAxis > playerOneStartOffsetY + 100f) &&
                 Range.create(playerOneStartOffsetX - 50f, playerOneStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
-//    Log.d(
-//        "GameBoard",
-//        "left collision : $leftCollisionMovement, upcollision $upCollisionMovement, downcollision: $downCollisionMovement" +
-//                "right collision $rightCollisionMovement"
-//    )
+//
 
     Log.d(
         "GameBoard",
-        "playerXOffset: $playerOneStartOffsetX playerYOffset: ${playerOneStartOffsetY}," +
+        "playerXOffset: $playerOneOffsetX playerYOffset: ${playerOneOffsetY}," +
                 " ballOffsetX ${ballMovementXAxis}, ballOffsetY ${ballMovementYAxis}, collision: $upCollision"
     )
 //    Log.d("GameBoard", "up collision : $upCollisionMovement, down collision $downCollisionMovement, right collision $rightCollisionMovement" +
@@ -215,7 +208,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
 //                " ballOffsetX ${ballOffsetX}, ballOffsetY ${ballOffsetY}, collision: $downCollision"
 //    )
 
-    if (player1goal) {
+    if (player1goal || player2goal) {
         Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
         upCollisionMovement = false
         downCollisionMovement = false
@@ -279,34 +272,34 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                             // these range conditions confirm that the finger is placed within 100f of the players puck
                             if (Range
                                     .create(
-                                        playerOneStartOffsetX - 100f,
-                                        playerOneStartOffsetX + 100f
+                                        playerOneOffsetX - 100f,
+                                        playerOneOffsetX + 100f
                                     )
                                     .contains(change.position.x) && Range
                                     .create(
-                                        playerOneStartOffsetY - 100f,
-                                        playerOneStartOffsetY + 100f
+                                        playerOneOffsetY - 100f,
+                                        playerOneOffsetY + 100f
                                     )
                                     .contains(change.position.y)
                             ) {
-                                if (playerOneStartOffsetX < 805f && playerOneStartOffsetX > 160f) {
+                                if (playerOneOffsetX < 805f && playerOneOffsetX > 160f) {
                                     //player is within boundary so update location
-                                    playerOneStartOffsetX += dragAmount.x
-                                } else if (playerOneStartOffsetX > 805f && dragAmount.x < 0) {
+                                    playerOneOffsetX += dragAmount.x
+                                } else if (playerOneOffsetX > 805f && dragAmount.x < 0) {
                                     // player is almost at the right most edge of boundary so only accept drags to the left
-                                    playerOneStartOffsetX += dragAmount.x
-                                } else if (playerOneStartOffsetX < 160f && dragAmount.x > 0) {
+                                    playerOneOffsetX += dragAmount.x
+                                } else if (playerOneOffsetX < 160f && dragAmount.x > 0) {
                                     // player is almost at the left most edge of boundary so only accept drags to the right
-                                    playerOneStartOffsetX += dragAmount.x
+                                    playerOneOffsetX += dragAmount.x
                                 }
 
                                 // handle Vertical dragging
-                                if (playerOneStartOffsetY > 1050f && playerOneStartOffsetY < 1790f) {
-                                    playerOneStartOffsetY += dragAmount.y
-                                } else if (playerOneStartOffsetY > 1790f && dragAmount.y < 0) {
-                                    playerOneStartOffsetY += dragAmount.y
-                                } else if (playerOneStartOffsetY < 1050f && dragAmount.y > 0) {
-                                    playerOneStartOffsetY += dragAmount.y
+                                if (playerOneOffsetY > 1050f && playerOneOffsetY < 1790f) {
+                                    playerOneOffsetY += dragAmount.y
+                                } else if (playerOneOffsetY > 1790f && dragAmount.y < 0) {
+                                    playerOneOffsetY += dragAmount.y
+                                } else if (playerOneOffsetY < 1050f && dragAmount.y > 0) {
+                                    playerOneOffsetY += dragAmount.y
                                 }
 
                             }
@@ -336,7 +329,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 drawCircle(
                     color = Color.Blue,
                     radius = 100f,
-                    center = Offset(playerOneStartOffsetX, playerOneStartOffsetY)
+                    center = Offset(playerOneOffsetX, playerOneOffsetY)
                 )
 
                 // scores
