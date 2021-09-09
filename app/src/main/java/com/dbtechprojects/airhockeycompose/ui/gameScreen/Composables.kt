@@ -185,13 +185,18 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                     .contains(playerOneStartOffsetY) ||
                 // ball has hit left border
                 ballMovementXAxis < 100f
-    val goal: Boolean =
+    val player1goal: Boolean =
         // top goal
         Range.create(playerTwoStartOffsetY - 100f, playerTwoStartOffsetY)
             .contains(ballMovementYAxis) &&
                 Range.create(playerTwoStartOffsetX - 50f, playerTwoStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
-
+        // bottom goal
+    val player2goal : Boolean =
+        Range.create(playerOneStartOffsetY - 100f, playerOneStartOffsetY)
+            .contains(ballMovementYAxis) &&
+                Range.create(playerOneStartOffsetX - 50f, playerOneStartOffsetX + 50f)
+                    .contains(ballMovementXAxis)
 //    Log.d(
 //        "GameBoard",
 //        "left collision : $leftCollisionMovement, upcollision $upCollisionMovement, downcollision: $downCollisionMovement" +
@@ -210,7 +215,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
 //                " ballOffsetX ${ballOffsetX}, ballOffsetY ${ballOffsetY}, collision: $downCollision"
 //    )
 
-    if (goal) {
+    if (player1goal) {
         Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
         upCollisionMovement = false
         downCollisionMovement = false
