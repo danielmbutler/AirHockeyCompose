@@ -3,6 +3,7 @@ package com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU
 import android.graphics.Typeface
 import android.util.Log
 import android.util.Range
+import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -45,6 +46,7 @@ fun GameTitle(text: String) {
         )
     }
 }
+
 
 @Composable
 fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
@@ -457,4 +459,31 @@ fun GameMenu(onGameButtonClick: () -> Unit) {
 
         }
     }
+}
+@Composable
+fun ComponentActivity.playerVsCpuState() : GameState {
+    return GameState(
+        playerOneOffsetX = remember { mutableStateOf(461f) },
+        playerOneStartOffsetY = remember { mutableStateOf(1780f) },
+        playerOneStartOffsetX = remember { mutableStateOf(461f) },
+        playerOneOffsetY = remember { mutableStateOf(1780f) },
+        playerTwoStartOffsetX = remember { mutableStateOf(461f) },
+        playerTwoStartOffsetY = remember { mutableStateOf(100f) },
+        ballStartOffsetX = remember { mutableStateOf(461f) },
+        ballStartOffsetY = remember { mutableStateOf(958f) },
+        upCollisionMovement = remember { mutableStateOf(false) },
+        downCollisionMovement = remember { mutableStateOf(false) },
+        goalCollisionMovement = remember { mutableStateOf(false) },
+        rightCollisionMovement = remember { mutableStateOf(false) },
+        leftCollisionMovement = remember { mutableStateOf(false) },
+        player1Goal = remember { mutableStateOf(false) },
+        player2Goal = remember {
+            mutableStateOf(false)
+        },
+        player1GoalCount = remember { mutableStateOf(0) },
+        player2GoalCount = remember { mutableStateOf(0) },
+        endGame = remember { mutableStateOf(false) }
+
+
+    )
 }
