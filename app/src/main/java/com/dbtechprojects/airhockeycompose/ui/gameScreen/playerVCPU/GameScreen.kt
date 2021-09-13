@@ -1,5 +1,6 @@
 package com.dbtechprojects.airhockeycompose.ui.gameScreen
 
+import android.graphics.Typeface
 import android.util.Log
 import android.util.Range
 import androidx.compose.animation.core.LinearEasing
@@ -23,6 +24,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.sharedGameFunctions
 
 @Composable
 fun GameTitle(text: String) {
@@ -45,8 +49,8 @@ fun GameTitle(text: String) {
 @Composable
 fun GameBoard(gameModeState: MutableState<Boolean>) {
     // setting out initial positions
-    var playerOneStartOffsetX by remember { mutableStateOf(461f) }
-    var playerOneStartOffsetY by remember { mutableStateOf(1780f) }
+    val playerOneStartOffsetX by remember { mutableStateOf(461f) }
+    val playerOneStartOffsetY by remember { mutableStateOf(1780f) }
     var playerOneOffsetX by remember { mutableStateOf(461f) }
     var playerOneOffsetY by remember { mutableStateOf(1780f) }
     val playerTwoStartOffsetX by remember { mutableStateOf(461f) }
@@ -82,6 +86,18 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
     var player2Goal by remember {
         mutableStateOf(false)
     }
+    var endGame by remember {
+        mutableStateOf(false)
+    }
+    if (player1GoalCount > 4 || player2GoalCount > 4) {
+        endGame = true
+        downCollisionMovement = false
+        goalCollisionMovement = false
+        rightCollisionMovement = false
+        leftCollisionMovement = false
+        upCollisionMovement = false
+
+    }
 
 
     val ballMovementYAxis by animateFloatAsState(
@@ -107,9 +123,9 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
         },
         animationSpec = tween(850, easing = LinearEasing),
         finishedListener = {
-            if (goalCollisionMovement){
+            if (goalCollisionMovement) {
                 goalCollisionMovement = false
-                if(player1Goal) player1GoalCount += 1
+                if (player1Goal) player1GoalCount += 1
                 if (player2Goal) player2GoalCount += 1
             }
         }
@@ -207,8 +223,8 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
         ballMovementYAxis < playerTwoStartOffsetY &&
                 Range.create(playerTwoStartOffsetX - 50f, playerTwoStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
-        // bottom goal
-    val player2goalCheck : Boolean =
+    // bottom goal
+    val player2goalCheck: Boolean =
         (ballMovementYAxis > playerOneStartOffsetY + 100f) &&
                 Range.create(playerOneStartOffsetX - 50f, playerOneStartOffsetX + 50f)
                     .contains(ballMovementXAxis)
@@ -233,11 +249,11 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
         leftCollisionMovement = false
         rightCollisionMovement = false
         goalCollisionMovement = true
-        if (player1goalCheck){
+        if (player1goalCheck) {
             player1Goal = true
             player2Goal = false
         }
-        if(player2goalCheck){
+        if (player2goalCheck) {
             player2Goal = true
             player1Goal = false
         }
@@ -277,10 +293,21 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
             .fillMaxSize()
     )
     {
+        if (endGame) {
+            Button(onClick = {
+                gameModeState.value = false
+                endGame = false
+                player1GoalCount = 0
+                player2GoalCount = 0
+            }, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 180.dp).zIndex(1f)) {
+                Text(text = "Return to Menu")
+            }
 
-        Column() {
-            // paint object o use to write scores
 
+        }
+
+        Column(modifier = Modifier.zIndex(-1f)) {
+            // paint object to use to write scores
             val paint = Paint().asFrameworkPaint()
             Canvas(
                 modifier = Modifier
@@ -305,7 +332,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                                         playerOneOffsetY - 100f,
                                         playerOneOffsetY + 100f
                                     )
-                                    .contains(change.position.y)
+                                    .contains(change.position.y) && !endGame
                             ) {
                                 if (playerOneOffsetX < 805f && playerOneOffsetX > 160f) {
                                     //player is within boundary so update location
@@ -377,6 +404,25 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                     paint
                 )
 
+                if (endGame) {
+                    drawContext.canvas.nativeCanvas.drawText(
+                        "Game Over ${
+                            sharedGameFunctions.determineWinner(
+                                player1GoalCount,
+                                player2GoalCount
+                            )
+                        }",
+                        150f,
+                        height / 2 + 400f,
+                        paint.apply {
+                            textSize = 50f
+                            typeface = Typeface.DEFAULT_BOLD
+                            color = Color.Yellow.toArgb()
+                        }
+                    )
+
+                }
+
             }
         }
         if (!gameModeState.value) {
@@ -385,6 +431,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
             }
         }
     }
+
 }
 
 @Composable

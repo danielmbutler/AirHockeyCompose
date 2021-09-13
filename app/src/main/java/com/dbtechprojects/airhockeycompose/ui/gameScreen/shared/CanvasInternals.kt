@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose.ui.gameScreen
+package com.dbtechprojects.airhockeycompose.ui.gameScreen.shared
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
