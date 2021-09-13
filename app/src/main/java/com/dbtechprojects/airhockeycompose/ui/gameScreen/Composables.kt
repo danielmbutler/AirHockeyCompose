@@ -136,7 +136,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
             }
             else -> playerTwoStartOffsetX
         },
-        animationSpec = tween(4000, easing = LinearEasing)
+        animationSpec = tween(1500, easing = LinearEasing)
     )
 
     val player2MovementYAxis by animateFloatAsState(
@@ -148,7 +148,7 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 playerTwoStartOffsetY
             }
         },
-        animationSpec = tween(4000, easing = LinearEasing)
+        animationSpec = tween(1500, easing = LinearEasing)
     )
 
 
@@ -181,7 +181,12 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
                     .contains(playerOneOffsetY) ||
                 // ball has hit right border
-                ballMovementXAxis > 805f
+                ballMovementXAxis > 805f ||
+                // ball has hit player 2 leftside
+                Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 200f)
+                    .contains(player2MovementXAxis) &&
+                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
+                    .contains(player2MovementYAxis)
 
     val rightCollision: Boolean =
         // ball has hit player right side side
@@ -190,7 +195,13 @@ fun GameBoard(gameModeState: MutableState<Boolean>) {
                 Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
                     .contains(playerOneOffsetY) ||
                 // ball has hit left border
-                ballMovementXAxis < 100f
+                ballMovementXAxis < 100f ||
+                // ball has hit player 2 right side
+                Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
+                    .contains(player2MovementXAxis) &&
+                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
+                    .contains(player2MovementXAxis)
+
     val player1goalCheck: Boolean =
         // top goal
         ballMovementYAxis < playerTwoStartOffsetY &&
