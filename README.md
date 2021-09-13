@@ -8,5 +8,5 @@ classic Air Hockey game created using Jetpack Compose (Work in progress)
 
 ## Demo Video
 <p align="center">
-  <img src="https://github.com/danielmbutler/pokemonresourceImages/blob/master/searchview.PNG" width="250" >
+  <img src="https://github.com/danielmbutler/AirHockeyCompose/blob/master/resources/PlayerVCpu.gif" width="500" >
 </p>
