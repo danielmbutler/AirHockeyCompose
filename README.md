@@ -7,3 +7,6 @@ classic Air Hockey game created using Jetpack Compose (Work in progress)
 * Two Player Online (not yet implemented)
 
 ## Demo Video
+<p align="center">
+  <img src="https://github.com/danielmbutler/pokemonresourceImages/blob/master/searchview.PNG" width="250" >
+</p>
