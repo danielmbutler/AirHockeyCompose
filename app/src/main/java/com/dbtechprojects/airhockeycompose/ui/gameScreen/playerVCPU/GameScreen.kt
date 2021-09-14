@@ -46,6 +46,8 @@ fun GameTitle(text: String) {
 
 @Composable
 fun GameBoard(playerVsCpuState: () -> Unit, gameState: GameState) {
+
+    Log.d("GameBoard", gameState.toString())
     // setting out initial positions
 
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
@@ -230,7 +232,7 @@ fun GameBoard(playerVsCpuState: () -> Unit, gameState: GameState) {
                     .padding(20.dp)
                     .pointerInput(Unit) {
                         /*
-                        handle dragging player counter, the below logic keeps the playing within the game
+                        handle dragging player counter, the below logic keeps the player within the game
                         boundaries, as the values are mutable we are continuously keeping track of them and will update
                         the players location unless the drag event is within the boundary
                          */

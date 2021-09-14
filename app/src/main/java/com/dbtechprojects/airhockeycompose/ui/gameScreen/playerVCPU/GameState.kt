@@ -13,8 +13,8 @@ data class GameState(
     val playerOneOffsetY: MutableState<Float> = mutableStateOf(1780f),
     val playerTwoStartOffsetX: MutableState<Float> = mutableStateOf(461f),
     val playerTwoStartOffsetY: MutableState<Float> = mutableStateOf(100f),
-    val ballStartOffsetX : MutableState<Float> = mutableStateOf(461f),
-    val ballStartOffsetY : MutableState<Float> = mutableStateOf(958f),
+    val ballStartOffsetX: MutableState<Float> = mutableStateOf(461f),
+    val ballStartOffsetY: MutableState<Float> = mutableStateOf(958f),
     val upCollisionMovement: MutableState<Boolean> = mutableStateOf(false),
     val downCollisionMovement: MutableState<Boolean> = mutableStateOf(false),
     val leftCollisionMovement: MutableState<Boolean> = mutableStateOf(false),
@@ -37,83 +37,89 @@ enum class GameTypeState {
     PLAYER_VS_CPU
 }
 
+
 @Composable
-fun playerVsCpuState(gameState: GameState) : GameState {
+fun playerVsCpuState(gameState: GameState): GameState {
 
-    gameState.ballMovementYAxis = animateFloatAsState(
-        targetValue =
-        when {
-            gameState.downCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value + 1850f
+    return gameState.copy(
+        playerTwoOffsetX = when {
+            gameState.menuState.value -> {
+                gameState.ballMovementXAxis
             }
-            gameState.upCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value - 1700f
-            }
-            gameState.leftCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value - 900f
-            }
-            gameState.rightCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value - 900f
-            }
-            gameState.goalCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value
-            }
-
-            else -> gameState.ballStartOffsetY.value
+            else -> gameState.playerTwoStartOffsetX.value
+        }.let {
+            animateFloatAsState(
+                targetValue = it,
+                animationSpec = tween(1500, easing = LinearEasing)
+            ).value
         },
-        animationSpec = tween(850, easing = LinearEasing),
-        finishedListener = {
-            if (gameState.goalCollisionMovement.value) {
-                gameState.goalCollisionMovement.value = false
-                if (gameState.player1Goal.value) gameState.player1GoalCount.value += 1
-                if (gameState.player2Goal.value) gameState.player2GoalCount.value += 1
-            }
-        }
-    ).value
-
-    gameState.ballMovementXAxis = animateFloatAsState(
-        targetValue =
-        when {
-            gameState.leftCollisionMovement.value -> {
-                gameState.ballStartOffsetX.value - 650f
-            }
-            gameState.rightCollisionMovement.value -> {
-                gameState.ballStartOffsetX.value + 650f
-            }
-            else -> gameState.ballStartOffsetX.value
-        },
-        animationSpec = tween(1000, easing = LinearEasing),
-
-        ).value
-
-    gameState.playerTwoOffsetX = when {
-        gameState.menuState.value -> {
-            gameState.ballMovementXAxis
-        }
-        else -> gameState.playerTwoStartOffsetX.value
-    }.let {
-        animateFloatAsState(
-            targetValue = it,
+        playerTwoOffsetY = animateFloatAsState(
+            targetValue = when {
+                gameState.downCollisionMovement.value -> {
+                    gameState.ballStartOffsetY.value // center line
+                }
+                else -> {
+                    gameState.playerTwoStartOffsetY.value
+                }
+            },
             animationSpec = tween(1500, easing = LinearEasing)
-        ).value
-    }
+        ).value,
+        ballMovementYAxis = animateFloatAsState(
+            targetValue =
+            when {
+                gameState.downCollisionMovement.value -> {
+                    gameState.ballStartOffsetY.value + 1850f
+                }
+                gameState.upCollisionMovement.value -> {
+                    gameState.ballStartOffsetY.value - 1700f
+                }
+                gameState.leftCollisionMovement.value -> {
+                    gameState.ballStartOffsetY.value - 900f
+                }
+                gameState.rightCollisionMovement.value -> {
+                    gameState.ballStartOffsetY.value - 900f
+                }
+                gameState.goalCollisionMovement.value -> {
+                    gameState.ballStartOffsetY.value
+                }
 
-    gameState.playerTwoOffsetY = animateFloatAsState(
-        targetValue = when {
-            gameState.downCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value // center line
+                else -> gameState.ballStartOffsetY.value
+            },
+            animationSpec = tween(850, easing = LinearEasing),
+            finishedListener = {
+                if (gameState.goalCollisionMovement.value) {
+                    gameState.goalCollisionMovement.value = false
+                    if (gameState.player1Goal.value) gameState.player1GoalCount.value += 1
+                    if (gameState.player2Goal.value) gameState.player2GoalCount.value += 1
+                }
             }
-            else -> {
-                gameState.playerTwoStartOffsetY.value
-            }
-        },
-        animationSpec = tween(1500, easing = LinearEasing)
-    ).value
+        ).value,
+        ballMovementXAxis = animateFloatAsState(
+            targetValue =
+            when {
+                gameState.leftCollisionMovement.value -> {
+                    gameState.ballStartOffsetX.value - 650f
+                }
+                gameState.rightCollisionMovement.value -> {
+                    gameState.ballStartOffsetX.value + 650f
+                }
+                else -> gameState.ballStartOffsetX.value
+            },
+            animationSpec = tween(1000, easing = LinearEasing),
+
+            ).value
+    )
+
+}
+
+@Composable
+fun TwoPlayerLocalState(gameState: GameState): GameState {
+
+    gameState.playerTwoOffsetX = gameState.playerOneStartOffsetX.value
+    gameState.playerTwoOffsetY = gameState.playerTwoStartOffsetY.value
 
     return gameState
 
 }
-
-
 
 

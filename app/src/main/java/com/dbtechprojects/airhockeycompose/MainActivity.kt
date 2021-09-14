@@ -20,9 +20,8 @@ import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
 
 class MainActivity : ComponentActivity() {
 
-    // decide between multiplayer, single or two player local
-    private lateinit var gameTypeState: MutableState<GameTypeState>
     private lateinit var gameState: MutableState<GameState>
+    private lateinit var gameTypeState: MutableState<GameTypeState>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
