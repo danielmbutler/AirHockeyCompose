@@ -3,10 +3,6 @@ package com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU
 import android.graphics.Typeface
 import android.util.Log
 import android.util.Range
-import androidx.activity.ComponentActivity
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,7 +45,7 @@ fun GameTitle(text: String) {
 
 
 @Composable
-fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
+fun GameBoard(playerVsCpuState: () -> Unit, gameState: GameState) {
     // setting out initial positions
 
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
@@ -61,152 +57,93 @@ fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
         gameState.upCollisionMovement.value = false
     }
 
-    val ballMovementYAxis by animateFloatAsState(
-        targetValue =
-        when {
-            gameState.downCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value + 1850f
-            }
-            gameState.upCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value - 1700f
-            }
-            gameState.leftCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value - 900f
-            }
-            gameState.rightCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value - 900f
-            }
-            gameState.goalCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value
-            }
-
-            else -> gameState.ballStartOffsetY.value
-        },
-        animationSpec = tween(850, easing = LinearEasing),
-        finishedListener = {
-            if (gameState.goalCollisionMovement.value) {
-                gameState.goalCollisionMovement.value = false
-                if (gameState.player1Goal.value) gameState.player1GoalCount.value += 1
-                if (gameState.player2Goal.value) gameState.player2GoalCount.value += 1
-            }
-        }
-    )
-    val ballMovementXAxis by animateFloatAsState(
-        targetValue =
-        when {
-            gameState.leftCollisionMovement.value -> {
-                gameState.ballStartOffsetX.value - 650f
-            }
-            gameState.rightCollisionMovement.value -> {
-                gameState.ballStartOffsetX.value + 650f
-            }
-            else -> gameState.ballStartOffsetX.value
-        },
-        animationSpec = tween(1000, easing = LinearEasing),
-
-        )
-
-    val player2MovementXAxis by animateFloatAsState(
-        targetValue = when {
-            menuState.value -> {
-                ballMovementXAxis
-            }
-            else -> gameState.playerTwoStartOffsetX.value
-        },
-        animationSpec = tween(1500, easing = LinearEasing)
-    )
-
-    val player2MovementYAxis by animateFloatAsState(
-        targetValue = when {
-            gameState.downCollisionMovement.value -> {
-                gameState.ballStartOffsetY.value // center line
-            }
-            else -> {
-                gameState.playerTwoStartOffsetY.value
-            }
-        },
-        animationSpec = tween(1500, easing = LinearEasing)
-    )
-
-
     // define collision checks
 
     val upCollision: Boolean =
         // ball has hit player one
-        Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 100f)
+        Range.create(gameState.ballMovementXAxis - 100f, gameState.ballMovementXAxis + 100f)
             .contains(gameState.playerOneOffsetX.value) &&
-                Range.create(ballMovementYAxis, ballMovementYAxis + 120f)
+                Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 120f)
                     .contains(gameState.playerOneOffsetY.value)
     val downCollision: Boolean =
         // ball has hit player 2
-        Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 100f)
-            .contains(player2MovementXAxis) &&
-                Range.create(ballMovementYAxis - 80f, ballMovementYAxis + 150f)
-                    .contains(player2MovementYAxis) ||
+        Range.create(gameState.ballMovementXAxis - 100f, gameState.ballMovementXAxis + 100f)
+            .contains(gameState.playerTwoOffsetX) &&
+                Range.create(
+                    gameState.ballMovementYAxis - 80f,
+                    gameState.ballMovementYAxis + 150f
+                )
+                    .contains(gameState.playerTwoOffsetY) ||
                 //ball has hit top border
-                ballMovementXAxis < (gameState.ballStartOffsetX.value - 150f) &&
+                gameState.ballMovementXAxis < (gameState.ballStartOffsetX.value - 150f) &&
                 Range.create(
                     gameState.playerTwoStartOffsetY.value - 100f,
                     gameState.playerTwoStartOffsetY.value
                 )
-                    .contains(ballMovementYAxis) || // if ball is higher than the starting position of player 2 then we know its at the top
-                ballMovementXAxis > (gameState.ballStartOffsetX.value + 150f) &&
+                    .contains(gameState.ballMovementYAxis) || // if ball is higher than the starting position of player 2 then we know its at the top
+                gameState.ballMovementXAxis > (gameState.ballStartOffsetX.value + 150f) &&
                 Range.create(
                     gameState.playerTwoStartOffsetY.value - 100f,
                     gameState.playerTwoStartOffsetY.value + 100f
                 )
-                    .contains(ballMovementYAxis)
+                    .contains(gameState.ballMovementYAxis)
 
     val leftCollision: Boolean =
         // ball has hit player left side
-        Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 200f)
+        Range.create(gameState.ballMovementXAxis - 100f, gameState.ballMovementXAxis + 200f)
             .contains(gameState.playerOneOffsetX.value) &&
-                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
+                Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
                     .contains(gameState.playerOneOffsetY.value) ||
                 // ball has hit right border
-                ballMovementXAxis > 805f ||
+                gameState.ballMovementXAxis > 805f ||
                 // ball has hit player 2 leftside
-                Range.create(ballMovementXAxis - 100f, ballMovementXAxis + 200f)
-                    .contains(player2MovementXAxis) &&
-                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
-                    .contains(player2MovementYAxis)
+                Range.create(
+                    gameState.ballMovementXAxis - 100f,
+                    gameState.ballMovementXAxis + 200f
+                )
+                    .contains(gameState.playerTwoOffsetX) &&
+                Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
+                    .contains(gameState.playerTwoOffsetY)
 
     val rightCollision: Boolean =
         // ball has hit player right side side
-        Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
+        Range.create(gameState.ballMovementXAxis - 200f, gameState.ballMovementXAxis - 100f)
             .contains(gameState.playerOneOffsetX.value) &&
-                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
+                Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
                     .contains(gameState.playerOneOffsetY.value) ||
                 // ball has hit left border
-                ballMovementXAxis < 100f ||
+                gameState.ballMovementXAxis < 100f ||
                 // ball has hit player 2 right side
-                Range.create(ballMovementXAxis - 200f, ballMovementXAxis - 100f)
-                    .contains(player2MovementXAxis) &&
-                Range.create(ballMovementYAxis, ballMovementYAxis + 60f)
-                    .contains(player2MovementXAxis)
+                Range.create(
+                    gameState.ballMovementXAxis - 200f,
+                    gameState.ballMovementXAxis - 100f
+                )
+                    .contains(gameState.playerTwoOffsetX) &&
+                Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
+                    .contains(gameState.playerTwoOffsetY)
 
     val player1goalCheck: Boolean =
         // top goal
-        ballMovementYAxis < gameState.playerTwoStartOffsetY.value &&
+        gameState.ballMovementYAxis < gameState.playerTwoStartOffsetY.value &&
                 Range.create(
                     gameState.playerTwoStartOffsetX.value - 50f,
                     gameState.playerTwoStartOffsetX.value + 50f
                 )
-                    .contains(ballMovementXAxis)
+                    .contains(gameState.ballMovementXAxis)
     // bottom goal
     val player2goalCheck: Boolean =
-        (ballMovementYAxis > gameState.playerOneStartOffsetY.value + 100f) &&
+        (gameState.ballMovementYAxis > gameState.playerOneStartOffsetY.value + 100f) &&
                 Range.create(
                     gameState.playerOneStartOffsetX.value - 50f,
                     gameState.playerOneStartOffsetX.value + 50f
                 )
-                    .contains(ballMovementXAxis)
+                    .contains(gameState.ballMovementXAxis)
 //
 
 //    Log.d(
 //        "GameBoard",
 //        "playerXOffset: $playerOneOffsetX playerYOffset: ${playerOneOffsetY}," +
-//                " ballOffsetX ${ballMovementXAxis}, ballOffsetY ${ballMovementYAxis}, collision: $upCollision"
+//                " ballOffsetX ${gameState.ballMovementXAxis}, ballOffsetY ${gameState.ballMovementYAxis}, collision: $upCollision"
 //    )
 //    Log.d("GameBoard", "up collision : $upCollisionMovement, down collision $downCollisionMovement, right collision $rightCollisionMovement" +
 //            "left collision : $leftCollisionMovement")
@@ -269,7 +206,7 @@ fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
         if (gameState.endGame.value) {
             Button(
                 onClick = {
-                    menuState.value = false
+                    gameState.menuState.value = false
                     gameState.endGame.value = false
                     gameState.player1GoalCount.value = 0
                     gameState.player2GoalCount.value = 0
@@ -345,14 +282,14 @@ fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
                 drawCircle(
                     color = Color.Black,
                     radius = 40f,
-                    center = Offset(ballMovementXAxis, ballMovementYAxis),
+                    center = Offset(gameState.ballMovementXAxis, gameState.ballMovementYAxis),
 
                     )
                 // pucks
                 drawCircle(
                     color = Color.Red,
                     radius = 100f,
-                    center = Offset(player2MovementXAxis, player2MovementYAxis),
+                    center = Offset(gameState.playerTwoOffsetX, gameState.playerTwoOffsetY),
                 )
                 Log.d("player 2 pos", "x: ${width / 2} y: 100f")
                 //Offset(width/2, height - 100f),
@@ -406,9 +343,9 @@ fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
 
             }
         }
-        if (!menuState.value) {
-            GameMenu {
-                menuState.value = true
+        if (!gameState.menuState.value) {
+            GameMenu(playerVsCpuState) {
+                gameState.menuState.value = true
             }
         }
     }
@@ -416,7 +353,8 @@ fun GameBoard(menuState: MutableState<Boolean>, gameState: GameState) {
 }
 
 @Composable
-fun GameMenu(onGameButtonClick: () -> Unit) {
+fun GameMenu(playerVsCpuState: () -> Unit, onGameButtonClick: () -> Unit) {
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -432,7 +370,10 @@ fun GameMenu(onGameButtonClick: () -> Unit) {
             Column() {
 
                 Button(
-                    onClick = { onGameButtonClick.invoke() },
+                    onClick = {
+                        playerVsCpuState.invoke()
+                        onGameButtonClick.invoke()
+                    },
                     Modifier
                         .padding(10.dp)
                         .width(180.dp)
@@ -459,31 +400,4 @@ fun GameMenu(onGameButtonClick: () -> Unit) {
 
         }
     }
-}
-@Composable
-fun ComponentActivity.playerVsCpuState() : GameState {
-    return GameState(
-        playerOneOffsetX = remember { mutableStateOf(461f) },
-        playerOneStartOffsetY = remember { mutableStateOf(1780f) },
-        playerOneStartOffsetX = remember { mutableStateOf(461f) },
-        playerOneOffsetY = remember { mutableStateOf(1780f) },
-        playerTwoStartOffsetX = remember { mutableStateOf(461f) },
-        playerTwoStartOffsetY = remember { mutableStateOf(100f) },
-        ballStartOffsetX = remember { mutableStateOf(461f) },
-        ballStartOffsetY = remember { mutableStateOf(958f) },
-        upCollisionMovement = remember { mutableStateOf(false) },
-        downCollisionMovement = remember { mutableStateOf(false) },
-        goalCollisionMovement = remember { mutableStateOf(false) },
-        rightCollisionMovement = remember { mutableStateOf(false) },
-        leftCollisionMovement = remember { mutableStateOf(false) },
-        player1Goal = remember { mutableStateOf(false) },
-        player2Goal = remember {
-            mutableStateOf(false)
-        },
-        player1GoalCount = remember { mutableStateOf(0) },
-        player2GoalCount = remember { mutableStateOf(0) },
-        endGame = remember { mutableStateOf(false) }
-
-
-    )
 }
