@@ -136,19 +136,6 @@ fun TwoPlayerGameBoard(
                     gameState.playerOneStartOffsetX.value + 50f
                 )
                     .contains(gameState.ballMovementXAxis)
-//
-
-//    Log.d(
-//        "GameBoard",
-//        "playerXOffset: $playerOneOffsetX playerYOffset: ${playerOneOffsetY}," +
-//                " ballOffsetX ${gameState.ballMovementXAxis}, ballOffsetY ${gameState.ballMovementYAxis}, collision: $upCollision"
-//    )
-//    Log.d("GameBoard", "up collision : $upCollisionMovement, down collision $downCollisionMovement, right collision $rightCollisionMovement" +
-//            "left collision : $leftCollisionMovement")
-////    Log.d(
-//        "GameBoard", "playerTwoXOffset: $playerTwoOffsetX playerTwoYOffset: ${playerTwoOffsetY}," +
-//                " ballOffsetX ${ballOffsetX}, ballOffsetY ${ballOffsetY}, collision: $downCollision"
-//    )
 
     if (player1goalCheck || player2goalCheck) {
 //        Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
@@ -227,7 +214,7 @@ fun TwoPlayerGameBoard(
                     .fillMaxSize()
                     .padding(20.dp)
                     .pointerInteropFilter {
-                        if (gameTypeState.value == GameTypeState.TWO_PLAYER_LOCAL) {
+
                             if (Range
                                     .create(
                                         playerTwoOffsetX.value - 100f,
@@ -294,8 +281,6 @@ fun TwoPlayerGameBoard(
                                     }
                                 }
                             }
-
-                        }
 
                         if (Range
                                 .create(
