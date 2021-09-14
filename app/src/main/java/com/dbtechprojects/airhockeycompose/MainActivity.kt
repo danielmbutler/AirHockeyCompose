@@ -10,12 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameBoard
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameState
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameTypeState
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.playerVsCpuState
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.*
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.TwoPlayerGameBoard
 import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,6 +22,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var gameState: MutableState<GameState>
     private lateinit var gameTypeState: MutableState<GameTypeState>
 
+    @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -33,21 +33,42 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf(GameTypeState.INITIAL)
                 }
 
-                if (gameTypeState.value == GameTypeState.INITIAL){
-                    gameState = remember { mutableStateOf(GameState())}
-                } else if (gameTypeState.value == GameTypeState.PLAYER_VS_CPU){
-                    gameState.value = playerVsCpuState(gameState = gameState.value)
+                when (gameTypeState.value) {
+                    GameTypeState.INITIAL -> {
+                        gameState = remember { mutableStateOf(GameState()) }
+                    }
+                    GameTypeState.PLAYER_VS_CPU -> {
+                        gameState.value = playerVsCpuState(gameState = gameState.value)
+                    }
+                    GameTypeState.TWO_PLAYER_LOCAL -> {
+                        gameState.value = twoPlayerLocalState(gameState = gameState.value)
+                    }
                 }
                 Log.d("MAIN", gameTypeState.toString())
 
-                MainScreen({gameTypeState.value = GameTypeState.PLAYER_VS_CPU}, gameState)
+                MainScreen(
+                    {
+                        gameTypeState.value = GameTypeState.PLAYER_VS_CPU
+                    },
+                    {
+                        gameTypeState.value = GameTypeState.TWO_PLAYER_LOCAL
+                    },
+                    gameState,
+                    gameTypeState
+                )
             }
         }
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
-fun MainScreen(playerVsCpu: () -> Unit, gameState: MutableState<GameState>) {
+fun MainScreen(
+    playerVsCpu: () -> Unit,
+    twoPlayerLocal: () -> Unit,
+    gameState: MutableState<GameState>,
+    gameTypeState: MutableState<GameTypeState>
+) {
 
 
     Surface(
@@ -56,7 +77,19 @@ fun MainScreen(playerVsCpu: () -> Unit, gameState: MutableState<GameState>) {
     ) {
 
         Column(Modifier.padding(10.dp)) {
-            GameBoard(playerVsCpu,gameState.value)
+
+            when (gameTypeState.value) {
+                GameTypeState.INITIAL -> {
+                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal, gameTypeState)
+                }
+                GameTypeState.PLAYER_VS_CPU -> {
+                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal, gameTypeState)
+                }
+                GameTypeState.TWO_PLAYER_LOCAL -> {
+                    TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal, gameTypeState)
+                }
+            }
+
 
         }
 

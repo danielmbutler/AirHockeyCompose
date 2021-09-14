@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU
+package com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal
 
 import android.graphics.Typeface
 import android.util.Log
@@ -6,53 +6,45 @@ import android.util.Range
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.input.pointer.consumeAllChanges
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameMenu
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameState
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameTypeState
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.sharedGameFunctions
 
-
+@ExperimentalComposeUiApi
 @Composable
-fun GameTitle(text: String) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-        )
-    }
-}
-
-
-@Composable
-fun GameBoard(playerVsCpuState: () -> Unit,
-              gameState: GameState,
-              twoPlayerLocal: () -> Unit,
-              gameTypeState: MutableState<GameTypeState>) {
+fun TwoPlayerGameBoard(
+    playerVsCpuState: () -> Unit,
+    gameState: GameState,
+    twoPlayerLocal: () -> Unit,
+    gameTypeState: MutableState<GameTypeState>
+) {
 
     Log.d("GameBoard", gameState.toString())
     // setting out initial positions
+
+    val playerVsCpuOffset = Offset(gameState.playerTwoOffsetX, gameState.playerTwoOffsetY)
+    val playerTwoOffsetX = remember { mutableStateOf(gameState.playerTwoOffsetX) }
+    val playerTwoOffsetY = remember { mutableStateOf(gameState.playerTwoOffsetY) }
 
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
         gameState.endGame.value = true
@@ -234,49 +226,114 @@ fun GameBoard(playerVsCpuState: () -> Unit,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(20.dp)
-                    .pointerInput(Unit) {
-                        /*
-                        handle dragging player counter, the below logic keeps the player within the game
-                        boundaries, as the values are mutable we are continuously keeping track of them and will update
-                        the players location unless the drag event is within the boundary
-                         */
-                        detectDragGestures { change, dragAmount ->
-                            change.consumeAllChanges()
-                            // these range conditions confirm that the finger is placed within 100f of the players puck
+                    .pointerInteropFilter {
+                        if (gameTypeState.value == GameTypeState.TWO_PLAYER_LOCAL) {
                             if (Range
                                     .create(
-                                        gameState.playerOneOffsetX.value - 100f,
-                                        gameState.playerOneOffsetX.value + 100f
+                                        playerTwoOffsetX.value - 100f,
+                                        playerTwoOffsetX.value + 100f
                                     )
-                                    .contains(change.position.x) && Range
+                                    .contains(it.x) && Range
                                     .create(
-                                        gameState.playerOneOffsetY.value - 100f,
-                                        gameState.playerOneOffsetY.value + 100f
+                                        playerTwoOffsetY.value - 100f,
+                                        playerTwoOffsetY.value + 100f
                                     )
-                                    .contains(change.position.y) && !gameState.endGame.value
+                                    .contains(it.y) && !gameState.endGame.value
                             ) {
-                                if (gameState.playerOneOffsetX.value < 805f && gameState.playerOneOffsetX.value > 160f) {
+                                if (playerTwoOffsetX.value < 805f && playerTwoOffsetX.value > 160f) {
                                     //player is within boundary so update location
-                                    gameState.playerOneOffsetX.value += dragAmount.x
-                                } else if (gameState.playerOneOffsetX.value > 805f && dragAmount.x < 0) {
+                                    playerTwoOffsetX.value = it.x
+                                } else if (playerTwoOffsetX.value > 805f && it.x < playerTwoOffsetX.value) {
                                     // player is almost at the right most edge of boundary so only accept drags to the left
-                                    gameState.playerOneOffsetX.value += dragAmount.x
-                                } else if (gameState.playerOneOffsetX.value < 160f && dragAmount.x > 0) {
+                                    playerTwoOffsetX.value = it.x
+                                } else if (playerTwoOffsetX.value < 160f && it.x > playerTwoOffsetX.value) {
                                     // player is almost at the left most edge of boundary so only accept drags to the right
-                                    gameState.playerOneOffsetX.value += dragAmount.x
+                                    playerTwoOffsetX.value = it.x
                                 }
 
-                                // handle Vertical dragging
-                                if (gameState.playerOneOffsetY.value > 1050f && gameState.playerOneOffsetY.value < 1790f) {
-                                    gameState.playerOneOffsetY.value += dragAmount.y
-                                } else if (gameState.playerOneOffsetY.value > 1790f && dragAmount.y < 0) {
-                                    gameState.playerOneOffsetY.value += dragAmount.y
-                                } else if (gameState.playerOneOffsetY.value < 1050f && dragAmount.y > 0) {
-                                    gameState.playerOneOffsetY.value += dragAmount.y
+                                if ( playerTwoOffsetY.value > 90f &&  playerTwoOffsetY.value < 850f) {
+                                    playerTwoOffsetY.value = it.y
+                                } else if ( playerTwoOffsetY.value > 850f && it.y <  playerTwoOffsetY.value) {
+                                    playerTwoOffsetY.value = it.y
+                                } else if (playerTwoOffsetY.value < 90f && it.y >  playerTwoOffsetY.value) {
+                                    playerTwoOffsetY.value = it.y
                                 }
+                            }
 
+                            if (it.pointerCount > 1) {
+                                if (Range
+                                        .create(
+                                            playerTwoOffsetX.value - 100f,
+                                            playerTwoOffsetX.value + 100f
+                                        )
+                                        .contains(sharedGameFunctions.getSecondPointerCoordinates(it).x) && Range
+                                        .create(
+                                            playerTwoOffsetY.value - 100f,
+                                            playerTwoOffsetY.value + 100f
+                                        )
+                                        .contains(sharedGameFunctions.getSecondPointerCoordinates(it).y) && !gameState.endGame.value
+                                ) {
+
+                                    if (playerTwoOffsetX.value < 805f && playerTwoOffsetX.value > 160f) {
+                                        //player is within boundary so update location
+                                        playerTwoOffsetX.value = sharedGameFunctions.getSecondPointerCoordinates(it).x
+                                    } else if (playerTwoOffsetX.value > 805f && sharedGameFunctions.getSecondPointerCoordinates(it).x < playerTwoOffsetX.value) {
+                                        // player is almost at the right most edge of boundary so only accept drags to the left
+                                        playerTwoOffsetX.value = sharedGameFunctions.getSecondPointerCoordinates(it).x
+                                    } else if (playerTwoOffsetX.value < 160f && sharedGameFunctions.getSecondPointerCoordinates(it).x > playerTwoOffsetX.value) {
+                                        // player is almost at the left most edge of boundary so only accept drags to the right
+                                        playerTwoOffsetX.value = sharedGameFunctions.getSecondPointerCoordinates(it).x
+                                    }
+
+                                    if ( playerTwoOffsetY.value > 90f &&  playerTwoOffsetY.value < 850f) {
+                                        playerTwoOffsetY.value = sharedGameFunctions.getSecondPointerCoordinates(it).y
+                                    } else if ( playerTwoOffsetY.value > 850f && sharedGameFunctions.getSecondPointerCoordinates(it).y <  playerTwoOffsetY.value) {
+                                        playerTwoOffsetY.value = sharedGameFunctions.getSecondPointerCoordinates(it).y
+                                    } else if (playerTwoOffsetY.value < 90f && sharedGameFunctions.getSecondPointerCoordinates(it).y >  playerTwoOffsetY.value) {
+                                        playerTwoOffsetY.value = sharedGameFunctions.getSecondPointerCoordinates(it).y
+                                    }
+                                }
+                            }
+
+                        }
+
+                        if (Range
+                                .create(
+                                    gameState.playerOneOffsetX.value - 100f,
+                                    gameState.playerOneOffsetX.value + 100f
+                                )
+                                .contains(it.x) && Range
+                                .create(
+                                    gameState.playerOneOffsetY.value - 100f,
+                                    gameState.playerOneOffsetY.value + 100f
+                                )
+                                .contains(it.y) && !gameState.endGame.value
+                        ) {
+
+
+                            if (gameState.playerOneOffsetX.value < 805f && gameState.playerOneOffsetX.value > 160f) {
+                                //player is within boundary so update location
+                                gameState.playerOneOffsetX.value = it.x
+                            } else if (gameState.playerOneOffsetX.value > 805f && it.x < gameState.playerOneOffsetX.value) {
+                                // player is almost at the right most edge of boundary so only accept drags to the left
+                                gameState.playerOneOffsetX.value = it.x
+                            } else if (gameState.playerOneOffsetX.value < 160f && it.x > gameState.playerOneOffsetX.value) {
+                                // player is almost at the left most edge of boundary so only accept drags to the right
+                                gameState.playerOneOffsetX.value = it.x
+                            }
+
+                            // handle Vertical dragging
+                            if (gameState.playerOneOffsetY.value > 1050f && gameState.playerOneOffsetY.value < 1790f) {
+                                gameState.playerOneOffsetY.value = it.y
+                            } else if (gameState.playerOneOffsetY.value > 1790f && it.y < gameState.playerOneOffsetY.value) {
+                                gameState.playerOneOffsetY.value = it.y
+                            } else if (gameState.playerOneOffsetY.value < 1050f && it.y > gameState.playerOneOffsetY.value) {
+                                gameState.playerOneOffsetY.value = it.y
                             }
                         }
+
+
+                        true
                     }
             ) {
                 val height = this.size.height
@@ -295,9 +352,15 @@ fun GameBoard(playerVsCpuState: () -> Unit,
                 drawCircle(
                     color = Color.Red,
                     radius = 100f,
-                    center = Offset(gameState.playerTwoOffsetX, gameState.playerTwoOffsetY),
+                    center = when (gameTypeState.value) {
+                        GameTypeState.PLAYER_VS_CPU -> playerVsCpuOffset
+                        GameTypeState.TWO_PLAYER_LOCAL -> Offset(
+                            playerTwoOffsetX.value,
+                            playerTwoOffsetY.value
+                        )
+                        else -> playerVsCpuOffset
+                    }
                 )
-                Log.d("player 2 pos", "x: ${width / 2} y: 100f")
                 //Offset(width/2, height - 100f),
                 drawCircle(
                     color = Color.Blue,
@@ -359,59 +422,3 @@ fun GameBoard(playerVsCpuState: () -> Unit,
 
 }
 
-@Composable
-fun GameMenu(
-    playerVsCpuState: () -> Unit,
-    onGameButtonClick: () -> Unit,
-    twoPlayerLocal: () -> Unit
-) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-            .background(color = Color(0f, 0f, 0f, 0.6f), shape = RectangleShape)
-    ) {
-        GameTitle(text = "Air Hockey Compose")
-        Row(
-            Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column() {
-
-                Button(
-                    onClick = {
-                        playerVsCpuState.invoke()
-                        onGameButtonClick.invoke()
-                    },
-                    Modifier
-                        .padding(10.dp)
-                        .width(180.dp)
-                ) {
-                    Text(text = "Single Player Local")
-                }
-                Button(
-                    onClick = {
-                        twoPlayerLocal.invoke()
-                        onGameButtonClick.invoke()
-                    },
-                    Modifier
-                        .padding(10.dp)
-                        .width(180.dp)
-                ) {
-                    Text(text = "Two Player Local")
-                }
-                Button(
-                    onClick = { onGameButtonClick.invoke() },
-                    Modifier
-                        .padding(10.dp)
-                        .width(180.dp)
-                ) {
-                    Text(text = "Two Player Online")
-                }
-            }
-
-        }
-    }
-}
