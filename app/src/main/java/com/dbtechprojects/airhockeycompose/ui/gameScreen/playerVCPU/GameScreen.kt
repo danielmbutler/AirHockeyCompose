@@ -51,8 +51,6 @@ fun GameBoard(playerVsCpuState: () -> Unit,
               twoPlayerLocal: () -> Unit,
               gameTypeState: MutableState<GameTypeState>) {
 
-    Log.d("GameBoard", gameState.toString())
-    // setting out initial positions
 
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
         gameState.endGame.value = true
