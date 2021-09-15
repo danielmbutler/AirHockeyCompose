@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.sharedGameFunctions
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.SharedGameFunctions
 
 
 @Composable
@@ -329,7 +329,7 @@ fun GameBoard(playerVsCpuState: () -> Unit,
                 if (gameState.endGame.value) {
                     drawContext.canvas.nativeCanvas.drawText(
                         "Game Over ${
-                            sharedGameFunctions.determineWinner(
+                            SharedGameFunctions.determineWinner(
                                 gameState.player1GoalCount.value,
                                 gameState.player2GoalCount.value
                             )

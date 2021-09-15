@@ -27,8 +27,9 @@ import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameMenu
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameState
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameTypeState
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.sharedGameFunctions
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.sharedGameFunctions.getPlayerOnePosition
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.SharedGameFunctions
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.PlayerPositionHelper.getPlayerOnePosition
+import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.PlayerPositionHelper.getPlayerTwoPosition
 
 @ExperimentalComposeUiApi
 @Composable
@@ -213,89 +214,19 @@ fun TwoPlayerGameBoard(
                     .padding(20.dp)
                     .pointerInteropFilter {
 
-                        if (Range
-                                .create(
-                                    playerTwoOffsetX.value - 100f,
-                                    playerTwoOffsetX.value + 100f
-                                )
-                                .contains(it.x) && Range
-                                .create(
-                                    playerTwoOffsetY.value - 100f,
-                                    playerTwoOffsetY.value + 100f
-                                )
-                                .contains(it.y) && !gameState.endGame.value
-                        ) {
-                            if (playerTwoOffsetX.value < 805f && playerTwoOffsetX.value > 160f) {
-                                //player is within boundary so update location
-                                playerTwoOffsetX.value = it.x
-                            } else if (playerTwoOffsetX.value > 805f && it.x < playerTwoOffsetX.value) {
-                                // player is almost at the right most edge of boundary so only accept drags to the left
-                                playerTwoOffsetX.value = it.x
-                            } else if (playerTwoOffsetX.value < 160f && it.x > playerTwoOffsetX.value) {
-                                // player is almost at the left most edge of boundary so only accept drags to the right
-                                playerTwoOffsetX.value = it.x
-                            }
+                        // workout whether playerOne's position should be changed
+                        val playerTwoPosition = getPlayerTwoPosition(
+                            endGame = gameState.endGame,
+                            motionEvent = it,
+                            playerTwoOffsetX = playerTwoOffsetX,
+                            playerTwoOffsetY = playerTwoOffsetY
+                        )
 
-                            if (playerTwoOffsetY.value > 90f && playerTwoOffsetY.value < 850f) {
-                                playerTwoOffsetY.value = it.y
-                            } else if (playerTwoOffsetY.value > 850f && it.y < playerTwoOffsetY.value) {
-                                playerTwoOffsetY.value = it.y
-                            } else if (playerTwoOffsetY.value < 90f && it.y > playerTwoOffsetY.value) {
-                                playerTwoOffsetY.value = it.y
-                            }
+                        playerTwoPosition?.x?.let { pos ->
+                            if(pos > 0f) playerTwoOffsetX.value = pos
                         }
-
-                        if (it.pointerCount > 1) {
-                            if (Range
-                                    .create(
-                                        playerTwoOffsetX.value - 100f,
-                                        playerTwoOffsetX.value + 100f
-                                    )
-                                    .contains(sharedGameFunctions.getSecondPointerCoordinates(it).x) && Range
-                                    .create(
-                                        playerTwoOffsetY.value - 100f,
-                                        playerTwoOffsetY.value + 100f
-                                    )
-                                    .contains(sharedGameFunctions.getSecondPointerCoordinates(it).y) && !gameState.endGame.value
-                            ) {
-
-                                if (playerTwoOffsetX.value < 805f && playerTwoOffsetX.value > 160f) {
-                                    //player is within boundary so update location
-                                    playerTwoOffsetX.value =
-                                        sharedGameFunctions.getSecondPointerCoordinates(it).x
-                                } else if (playerTwoOffsetX.value > 805f && sharedGameFunctions.getSecondPointerCoordinates(
-                                        it
-                                    ).x < playerTwoOffsetX.value
-                                ) {
-                                    // player is almost at the right most edge of boundary so only accept drags to the left
-                                    playerTwoOffsetX.value =
-                                        sharedGameFunctions.getSecondPointerCoordinates(it).x
-                                } else if (playerTwoOffsetX.value < 160f && sharedGameFunctions.getSecondPointerCoordinates(
-                                        it
-                                    ).x > playerTwoOffsetX.value
-                                ) {
-                                    // player is almost at the left most edge of boundary so only accept drags to the right
-                                    playerTwoOffsetX.value =
-                                        sharedGameFunctions.getSecondPointerCoordinates(it).x
-                                }
-
-                                if (playerTwoOffsetY.value > 90f && playerTwoOffsetY.value < 850f) {
-                                    playerTwoOffsetY.value =
-                                        sharedGameFunctions.getSecondPointerCoordinates(it).y
-                                } else if (playerTwoOffsetY.value > 850f && sharedGameFunctions.getSecondPointerCoordinates(
-                                        it
-                                    ).y < playerTwoOffsetY.value
-                                ) {
-                                    playerTwoOffsetY.value =
-                                        sharedGameFunctions.getSecondPointerCoordinates(it).y
-                                } else if (playerTwoOffsetY.value < 90f && sharedGameFunctions.getSecondPointerCoordinates(
-                                        it
-                                    ).y > playerTwoOffsetY.value
-                                ) {
-                                    playerTwoOffsetY.value =
-                                        sharedGameFunctions.getSecondPointerCoordinates(it).y
-                                }
-                            }
+                        playerTwoPosition?.y?.let { pos ->
+                            if(pos > 0f) playerTwoOffsetY.value = pos
                         }
 
                         // workout whether playerOne's position should be changed
@@ -374,7 +305,7 @@ fun TwoPlayerGameBoard(
                 if (gameState.endGame.value) {
                     drawContext.canvas.nativeCanvas.drawText(
                         "Game Over ${
-                            sharedGameFunctions.determineWinner(
+                            SharedGameFunctions.determineWinner(
                                 gameState.player1GoalCount.value,
                                 gameState.player2GoalCount.value
                             )
