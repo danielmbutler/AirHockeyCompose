@@ -20,7 +20,7 @@ object PlayerPositionHelper {
     )
             : Offset? {
 
-        if (endGame.value) return Offset(461f, 100f)
+        if (endGame.value) return Offset(461f, 100f) // return player to starting position if game is over
 
         var positionX = 0f
         var positionY = 0f
@@ -111,7 +111,7 @@ object PlayerPositionHelper {
     )
             : Offset? {
 
-        if (endGame.value) return Offset(461f, 1780f)
+        if (endGame.value) return Offset(461f, 1780f) // return player to starting position if game is over
 
         var positionX = 0f
         var positionY = 0f

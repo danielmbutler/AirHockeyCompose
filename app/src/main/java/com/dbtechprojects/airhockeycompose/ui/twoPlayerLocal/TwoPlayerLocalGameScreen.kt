@@ -68,17 +68,17 @@ fun TwoPlayerGameBoard(
                     gameState.ballMovementYAxis + 150f
                 )
                     .contains(playerTwoOffsetY.value) ||
-                //ball has hit top border
+                //ball has hit top border // if ball is higher than the starting position of player 2 then we know its at the top
                 gameState.ballMovementXAxis < (gameState.ballStartOffsetX.value - 150f) &&
                 Range.create(
-                    gameState.playerTwoStartOffsetY.value - 100f,
-                    gameState.playerTwoStartOffsetY.value
+                    gameState.playerTwoStartOffsetY.value - 250f,
+                    gameState.playerTwoStartOffsetY.value -100f
                 )
-                    .contains(gameState.ballMovementYAxis) || // if ball is higher than the starting position of player 2 then we know its at the top
+                    .contains(gameState.ballMovementYAxis) ||
                 gameState.ballMovementXAxis > (gameState.ballStartOffsetX.value + 150f) &&
                 Range.create(
-                    gameState.playerTwoStartOffsetY.value - 100f,
-                    gameState.playerTwoStartOffsetY.value + 100f
+                    gameState.playerTwoStartOffsetY.value - 250f,
+                    gameState.playerTwoStartOffsetY.value -100f
                 )
                     .contains(gameState.ballMovementYAxis)
 
@@ -91,10 +91,13 @@ fun TwoPlayerGameBoard(
                 // ball has hit right border
                 gameState.ballMovementXAxis > 805f
 
-    val borderLeftCollisionUp =  gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis < 461f
-    val borderLeftCollisionDown = gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis > 461f
-    val borderRightCollisionUp = gameState.ballMovementXAxis < 100f  && gameState.ballMovementYAxis > 461f
-    val borderRightCollisionDown = gameState.ballMovementXAxis < 100f  && gameState.ballMovementYAxis > 461f
+
+    // if ball is below center line and hits a border we want the direction of the ball to go towards the bottom
+    // if ball is above center line and hits a border we want the direction of the ball to go towards the top
+    val borderLeftCollisionUp =  gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis < 500f
+    val borderLeftCollisionDown = gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis > 440f
+    val borderRightCollisionUp = gameState.ballMovementXAxis < 100f  && gameState.ballMovementYAxis < 440f
+    val borderRightCollisionDown = gameState.ballMovementXAxis < 100f  && gameState.ballMovementYAxis > 500f
 
     Log.d("border collisions", "borderLeftCollisionUp $borderLeftCollisionUp, borderLeftCollisionDown $borderLeftCollisionDown, " +
             "borderRightCollisionUp $borderRightCollisionUp, borderRightCollisionDown $borderRightCollisionDown")
