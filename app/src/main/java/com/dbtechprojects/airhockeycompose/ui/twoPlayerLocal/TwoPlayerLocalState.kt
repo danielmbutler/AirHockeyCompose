@@ -46,7 +46,8 @@ fun twoPlayerLocalState(gameState: GameState): GameState {
         ballMovementXAxis = animateFloatAsState(
             targetValue =
             when {
-                gameState.leftCollisionMovement.value || gameState.leftCollisionPlayerTwoMovement.value -> {
+                gameState.leftCollisionMovement.value ||
+                        gameState.leftCollisionPlayerTwoMovement.value -> {
                     gameState.ballStartOffsetX.value - 650f
                 }
                 gameState.rightCollisionMovement.value || gameState.rightCollisionPlayerTwoMovement.value -> {
