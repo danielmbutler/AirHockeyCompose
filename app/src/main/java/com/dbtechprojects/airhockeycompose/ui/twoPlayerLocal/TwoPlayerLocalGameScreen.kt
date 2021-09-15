@@ -1,6 +1,7 @@
 package com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal
 
 import android.graphics.Typeface
+import android.util.Log
 import android.util.Range
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -61,12 +62,12 @@ fun TwoPlayerGameBoard(
     val downCollision: Boolean =
         // ball has hit player 2
         Range.create(gameState.ballMovementXAxis - 100f, gameState.ballMovementXAxis + 100f)
-            .contains(gameState.playerTwoOffsetX) &&
+            .contains(playerTwoOffsetX.value) &&
                 Range.create(
                     gameState.ballMovementYAxis - 80f,
                     gameState.ballMovementYAxis + 150f
                 )
-                    .contains(gameState.playerTwoOffsetY) ||
+                    .contains(playerTwoOffsetY.value) ||
                 //ball has hit top border
                 gameState.ballMovementXAxis < (gameState.ballStartOffsetX.value - 150f) &&
                 Range.create(
@@ -132,8 +133,12 @@ fun TwoPlayerGameBoard(
                 )
                     .contains(gameState.ballMovementXAxis)
 
+    Log.d(
+        "Game Board", "player2 offsets y: ${gameState.playerTwoStartOffsetY} x: ${gameState.playerTwoStartOffsetX}, ${gameState.ballMovementYAxis} "
+    )
+
     if (player1goalCheck || player2goalCheck) {
-//        Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
+       Log.d("Game Board", "GOALLLLLLLL ")
         gameState.upCollisionMovement.value = false
         gameState.downCollisionMovement.value = false
         gameState.leftCollisionMovement.value = false
