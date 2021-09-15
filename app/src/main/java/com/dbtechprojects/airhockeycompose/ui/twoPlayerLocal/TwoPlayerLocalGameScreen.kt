@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,6 +28,8 @@ import com.dbtechprojects.airhockeycompose.ui.playerVCPU.GameMenu
 import com.dbtechprojects.airhockeycompose.ui.shared.GameState
 import com.dbtechprojects.airhockeycompose.ui.shared.drawGameBoard
 import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions
+import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions.getMovementConditions
+import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions.setMovementConditionsToFalse
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.PlayerPositionHelper.getPlayerOnePosition
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.PlayerPositionHelper.getPlayerTwoPosition
 
@@ -42,14 +45,16 @@ fun TwoPlayerGameBoard(
     val playerTwoOffsetX = remember { mutableStateOf(gameState.playerTwoOffsetX) }
     val playerTwoOffsetY = remember { mutableStateOf(gameState.playerTwoOffsetY) }
 
+    // get list of movement conditions to loop through and change later
+    val movementConditions = getMovementConditions(gameState)
+
+    //condition to reset game
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
+        setMovementConditionsToFalse(movementConditions)
         gameState.endGame.value = true
-        gameState.downCollisionMovement.value = false
-        gameState.goalCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.upCollisionMovement.value = false
     }
+
+
 
     // define collision checks
 
@@ -64,21 +69,21 @@ fun TwoPlayerGameBoard(
         Range.create(gameState.ballMovementXAxis - 100f, gameState.ballMovementXAxis + 100f)
             .contains(playerTwoOffsetX.value) &&
                 Range.create(
-                    gameState.ballMovementYAxis - 80f,
-                    gameState.ballMovementYAxis + 150f
+                    gameState.ballMovementYAxis - 120,
+                    gameState.ballMovementYAxis
                 )
                     .contains(playerTwoOffsetY.value) ||
                 //ball has hit top border // if ball is higher than the starting position of player 2 then we know its at the top
                 gameState.ballMovementXAxis < (gameState.ballStartOffsetX.value - 150f) &&
                 Range.create(
                     gameState.playerTwoStartOffsetY.value - 250f,
-                    gameState.playerTwoStartOffsetY.value -100f
+                    gameState.playerTwoStartOffsetY.value - 100f
                 )
                     .contains(gameState.ballMovementYAxis) ||
                 gameState.ballMovementXAxis > (gameState.ballStartOffsetX.value + 150f) &&
                 Range.create(
                     gameState.playerTwoStartOffsetY.value - 250f,
-                    gameState.playerTwoStartOffsetY.value -100f
+                    gameState.playerTwoStartOffsetY.value - 100f
                 )
                     .contains(gameState.ballMovementYAxis)
 
@@ -94,15 +99,22 @@ fun TwoPlayerGameBoard(
 
     // if ball is below center line and hits a border we want the direction of the ball to go towards the bottom
     // if ball is above center line and hits a border we want the direction of the ball to go towards the top
-    val borderLeftCollisionUp =  gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis < 500f
-    val borderLeftCollisionDown = gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis > 600f
-    val borderRightCollisionUp = gameState.ballMovementXAxis < 100f  && gameState.ballMovementYAxis < 500f
-    val borderRightCollisionDown = gameState.ballMovementXAxis < 100f  && gameState.ballMovementYAxis > 600f
+    val borderLeftCollisionUp =
+        gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis < 500f
+    val borderLeftCollisionDown =
+        gameState.ballMovementXAxis > 805f && gameState.ballMovementYAxis > 600f
+    val borderRightCollisionUp =
+        gameState.ballMovementXAxis < 100f && gameState.ballMovementYAxis < 500f
+    val borderRightCollisionDown =
+        gameState.ballMovementXAxis < 100f && gameState.ballMovementYAxis > 600f
 
-    Log.d("border collisions", "borderLeftCollisionUp $borderLeftCollisionUp, borderLeftCollisionDown $borderLeftCollisionDown, " +
-            "borderRightCollisionUp $borderRightCollisionUp, borderRightCollisionDown $borderRightCollisionDown")
+    Log.d(
+        "border collisions",
+        "borderLeftCollisionUp $borderLeftCollisionUp, borderLeftCollisionDown $borderLeftCollisionDown, " +
+                "borderRightCollisionUp $borderRightCollisionUp, borderRightCollisionDown $borderRightCollisionDown"
+    )
 
-    val leftCollisionPlayerTwo : Boolean =
+    val leftCollisionPlayerTwo: Boolean =
 
         // ball has hit player 2 leftside
         Range.create(
@@ -150,14 +162,13 @@ fun TwoPlayerGameBoard(
                     .contains(gameState.ballMovementXAxis)
 
 
-    if (player1goalCheck || player2goalCheck) {
+    /*
+    the below movement conditions are handled in TwoPlayerLocalState.kt , once one is triggered
+    then we need to disable all over movement operations to ensure the correct movement for the ball occurs
+     */
 
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.rightCollisionPlayerTwoMovement.value = false
-        gameState.leftCollisionPlayerTwoMovement.value = false
+    if (player1goalCheck || player2goalCheck) {
+        setMovementConditionsToFalse(movementConditions)
         gameState.goalCollisionMovement.value = true
         if (player1goalCheck) {
             gameState.player1Goal.value = true
@@ -170,72 +181,28 @@ fun TwoPlayerGameBoard(
     }
 
     if (upCollision && !gameState.goalCollisionMovement.value) {
+        setMovementConditionsToFalse(movementConditions)
         gameState.upCollisionMovement.value = true
-        gameState.downCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.rightCollisionPlayerTwoMovement.value = false
-        gameState.leftCollisionPlayerTwoMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.borderRightCollisionDownMovement.value  = false
-        gameState.borderRightCollisionUpMovement.value = false
-        gameState.borderLeftCollisionDownMovement.value = false
-        gameState.borderLeftCollisionUpMovement.value = false
 
     }
     if (downCollision && !gameState.goalCollisionMovement.value) {
+        setMovementConditionsToFalse(movementConditions)
         gameState.downCollisionMovement.value = true
-        gameState.upCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.rightCollisionPlayerTwoMovement.value = false
-        gameState.leftCollisionPlayerTwoMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.borderRightCollisionDownMovement.value  = false
-        gameState.borderRightCollisionUpMovement.value = false
-        gameState.borderLeftCollisionDownMovement.value = false
-        gameState.borderLeftCollisionUpMovement.value = false
     }
     if (leftCollisionPlayerOne && !gameState.goalCollisionMovement.value) {
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.rightCollisionPlayerTwoMovement.value = false
-        gameState.leftCollisionPlayerTwoMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.leftCollisionMovement.value = true
-        gameState.borderRightCollisionDownMovement.value  = false
-        gameState.borderRightCollisionUpMovement.value = false
-        gameState.borderLeftCollisionDownMovement.value = false
-        gameState.borderLeftCollisionUpMovement.value = false
     }
     if (rightCollisionPlayerOne && !gameState.goalCollisionMovement.value) {
-        gameState.leftCollisionMovement.value = false
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.rightCollisionPlayerTwoMovement.value = false
-        gameState.leftCollisionPlayerTwoMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.rightCollisionMovement.value = true
-        gameState.borderRightCollisionDownMovement.value  = false
-        gameState.borderRightCollisionUpMovement.value = false
-        gameState.borderLeftCollisionDownMovement.value = false
-        gameState.borderLeftCollisionUpMovement.value = false
     }
     if (leftCollisionPlayerTwo && !gameState.goalCollisionMovement.value) {
-        gameState.leftCollisionMovement.value = false
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.rightCollisionPlayerTwoMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.leftCollisionPlayerTwoMovement.value = true
-        gameState.borderRightCollisionDownMovement.value  = false
-        gameState.borderRightCollisionUpMovement.value = false
-        gameState.borderLeftCollisionDownMovement.value = false
-        gameState.borderLeftCollisionUpMovement.value = false
     }
     if (rightCollisionPlayer2 && !gameState.goalCollisionMovement.value) {
-        gameState.leftCollisionMovement.value = false
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.leftCollisionPlayerTwoMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.rightCollisionPlayerTwoMovement.value = true
     }
     if (borderLeftCollisionDown) gameState.downCollisionMovement.value = true
@@ -285,7 +252,7 @@ fun TwoPlayerGameBoard(
                             playerTwoOffsetX = playerTwoOffsetX,
                             playerTwoOffsetY = playerTwoOffsetY
                         )
-
+                        // this function can return null if touch event is not near player
                         playerTwoPosition?.x?.let { pos ->
                             if (pos > 0f) playerTwoOffsetX.value = pos
                         }
@@ -301,6 +268,7 @@ fun TwoPlayerGameBoard(
                             playerOneOffsetY = gameState.playerOneOffsetY
                         )
 
+                        // this function can return null if touch event is not near player
                         playerOnePosition?.x?.let { pos ->
                             if (pos > 0f) gameState.playerOneOffsetX.value = pos
                         }
@@ -320,7 +288,7 @@ fun TwoPlayerGameBoard(
                 drawCircle(
                     color = Color.Black,
                     radius = 40f,
-                    center = Offset(gameState.ballMovementXAxis, gameState.ballMovementYAxis),
+                    center = if (!gameState.endGame.value) Offset(gameState.ballMovementXAxis, gameState.ballMovementYAxis) else Offset(gameState.ballStartOffsetX.value, gameState.ballStartOffsetY.value),
 
                     )
                 // pucks
