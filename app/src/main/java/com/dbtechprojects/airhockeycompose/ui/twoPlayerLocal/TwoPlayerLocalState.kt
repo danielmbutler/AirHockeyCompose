@@ -49,7 +49,7 @@ fun twoPlayerLocalState(gameState: GameState): GameState {
                 gameState.leftCollisionMovement.value || gameState.leftCollisionPlayerTwoMovement.value -> {
                     gameState.ballStartOffsetX.value - 650f
                 }
-                gameState.rightCollisionMovement.value -> {
+                gameState.rightCollisionMovement.value || gameState.rightCollisionPlayerTwoMovement.value -> {
                     gameState.ballStartOffsetX.value + 650f
                 }
                 else -> gameState.ballStartOffsetX.value

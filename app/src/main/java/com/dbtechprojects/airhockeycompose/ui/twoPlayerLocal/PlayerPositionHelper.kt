@@ -1,6 +1,6 @@
 package com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal
 
-import android.util.Log
+
 import android.util.Range
 import android.view.MotionEvent
 import androidx.compose.runtime.MutableState
@@ -19,6 +19,8 @@ object PlayerPositionHelper {
         endGame: MutableState<Boolean>
     )
             : Offset? {
+
+        if (endGame.value) return Offset(461f, 100f)
 
         var positionX = 0f
         var positionY = 0f
@@ -109,6 +111,8 @@ object PlayerPositionHelper {
     )
             : Offset? {
 
+        if (endGame.value) return Offset(461f, 1780f)
+
         var positionX = 0f
         var positionY = 0f
         if (Range
@@ -198,7 +202,7 @@ object PlayerPositionHelper {
                         // Get the pointer's current position
                         motionEvent.getX(pointerIndex) to motionEvent.getY(pointerIndex)
                     }
-                Log.d("pointer 2", "x: $pointer2X, y: $pointer2Y")
+
                 (Offset(pointer2X, pointer2Y))
 
             } catch (e: IndexOutOfBoundsException) {
