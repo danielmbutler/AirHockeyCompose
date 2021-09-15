@@ -51,6 +51,10 @@ fun TwoPlayerGameBoard(
     //condition to reset game
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
         setMovementConditionsToFalse(movementConditions)
+        playerTwoOffsetX.value = gameState.playerTwoStartOffsetX.value
+        playerTwoOffsetY.value = gameState.playerTwoStartOffsetY.value
+        gameState.playerOneOffsetY.value = gameState.playerOneStartOffsetY.value
+        gameState.playerOneOffsetX.value = gameState.playerOneStartOffsetX.value
         gameState.endGame.value = true
     }
 
@@ -331,6 +335,7 @@ fun TwoPlayerGameBoard(
                 )
 
                 if (gameState.endGame.value) {
+
                     drawContext.canvas.nativeCanvas.drawText(
                         "Game Over ${
                             SharedGameFunctions.determineWinner(
