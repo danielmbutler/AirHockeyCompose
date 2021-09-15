@@ -89,15 +89,18 @@ fun TwoPlayerGameBoard(
                 Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
                     .contains(gameState.playerOneOffsetY.value) ||
                 // ball has hit right border
-                gameState.ballMovementXAxis > 805f ||
-                // ball has hit player 2 leftside
-                Range.create(
-                    gameState.ballMovementXAxis - 100f,
-                    gameState.ballMovementXAxis + 200f
-                )
-                    .contains(gameState.playerTwoOffsetX) &&
-                Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
-                    .contains(gameState.playerTwoOffsetY)
+                gameState.ballMovementXAxis > 805f
+
+    val leftCollisionPlayerTwo : Boolean =
+
+    // ball has hit player 2 leftside
+    Range.create(
+        gameState.ballMovementXAxis - 100f,
+        gameState.ballMovementXAxis + 200f
+    )
+        .contains(playerTwoOffsetY.value) &&
+            Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
+                .contains(playerTwoOffsetY.value)
 
     val rightCollision: Boolean =
         // ball has hit player right side side
@@ -112,9 +115,9 @@ fun TwoPlayerGameBoard(
                     gameState.ballMovementXAxis - 200f,
                     gameState.ballMovementXAxis - 100f
                 )
-                    .contains(gameState.playerTwoOffsetX) &&
+                    .contains(playerTwoOffsetX.value) &&
                 Range.create(gameState.ballMovementYAxis, gameState.ballMovementYAxis + 60f)
-                    .contains(gameState.playerTwoOffsetY)
+                    .contains(playerTwoOffsetY.value)
 
     val player1goalCheck: Boolean =
         // top goal
@@ -133,9 +136,6 @@ fun TwoPlayerGameBoard(
                 )
                     .contains(gameState.ballMovementXAxis)
 
-    Log.d(
-        "Game Board", "player2 offsets y: ${gameState.playerTwoStartOffsetY} x: ${gameState.playerTwoStartOffsetX}, ${gameState.ballMovementYAxis} "
-    )
 
     if (player1goalCheck || player2goalCheck) {
        Log.d("Game Board", "GOALLLLLLLL ")
@@ -143,6 +143,7 @@ fun TwoPlayerGameBoard(
         gameState.downCollisionMovement.value = false
         gameState.leftCollisionMovement.value = false
         gameState.rightCollisionMovement.value = false
+        gameState.leftCollisionPlayerTwoMovement.value = false
         gameState.goalCollisionMovement.value = true
         if (player1goalCheck) {
             gameState.player1Goal.value = true
@@ -158,6 +159,7 @@ fun TwoPlayerGameBoard(
         gameState.upCollisionMovement.value = true
         gameState.downCollisionMovement.value = false
         gameState.leftCollisionMovement.value = false
+        gameState.leftCollisionPlayerTwoMovement.value = false
         gameState.rightCollisionMovement.value = false
 
     }
@@ -165,19 +167,29 @@ fun TwoPlayerGameBoard(
         gameState.downCollisionMovement.value = true
         gameState.upCollisionMovement.value = false
         gameState.leftCollisionMovement.value = false
+        gameState.leftCollisionPlayerTwoMovement.value = false
         gameState.rightCollisionMovement.value = false
     }
     if (leftCollision && !gameState.goalCollisionMovement.value) {
         gameState.upCollisionMovement.value = false
         gameState.downCollisionMovement.value = false
         gameState.rightCollisionMovement.value = false
+        gameState.leftCollisionPlayerTwoMovement.value = false
         gameState.leftCollisionMovement.value = true
     }
     if (rightCollision && !gameState.goalCollisionMovement.value) {
         gameState.leftCollisionMovement.value = false
         gameState.upCollisionMovement.value = false
         gameState.downCollisionMovement.value = false
+        gameState.leftCollisionPlayerTwoMovement.value = false
         gameState.rightCollisionMovement.value = true
+    }
+    if (leftCollisionPlayerTwo && !gameState.goalCollisionMovement.value) {
+        gameState.leftCollisionMovement.value = false
+        gameState.upCollisionMovement.value = false
+        gameState.downCollisionMovement.value = false
+        gameState.rightCollisionMovement.value = false
+        gameState.leftCollisionPlayerTwoMovement.value = true
     }
 
 

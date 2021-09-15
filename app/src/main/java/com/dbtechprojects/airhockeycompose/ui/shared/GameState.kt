@@ -17,6 +17,8 @@ data class GameState(
     val leftCollisionMovement: MutableState<Boolean> = mutableStateOf(false),
     val rightCollisionMovement: MutableState<Boolean> = mutableStateOf(false),
     val goalCollisionMovement: MutableState<Boolean> = mutableStateOf(false),
+    val leftCollisionPlayerTwoMovement: MutableState<Boolean> = mutableStateOf(false),
+    val rightCollisionPlayerTwoMovement: MutableState<Boolean> = mutableStateOf(false),
     val player1Goal: MutableState<Boolean> = mutableStateOf(false),
     val player2Goal: MutableState<Boolean> = mutableStateOf(false),
     val endGame: MutableState<Boolean> = mutableStateOf(false),

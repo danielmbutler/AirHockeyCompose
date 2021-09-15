@@ -22,14 +22,14 @@ fun twoPlayerLocalState(gameState: GameState): GameState {
                 gameState.upCollisionMovement.value -> {
                     gameState.ballStartOffsetY.value - 1700f
                 }
-                gameState.leftCollisionMovement.value -> {
-                    gameState.ballStartOffsetY.value - 900f
-                }
-                gameState.rightCollisionMovement.value -> {
+                gameState.leftCollisionMovement.value || gameState.rightCollisionMovement.value -> {
                     gameState.ballStartOffsetY.value - 900f
                 }
                 gameState.goalCollisionMovement.value -> {
                     gameState.ballStartOffsetY.value
+                }
+                gameState.leftCollisionPlayerTwoMovement.value ||  gameState.rightCollisionPlayerTwoMovement.value -> {
+                    gameState.ballStartOffsetY.value + 900f
                 }
 
                 else -> gameState.ballStartOffsetY.value
@@ -46,7 +46,7 @@ fun twoPlayerLocalState(gameState: GameState): GameState {
         ballMovementXAxis = animateFloatAsState(
             targetValue =
             when {
-                gameState.leftCollisionMovement.value -> {
+                gameState.leftCollisionMovement.value || gameState.leftCollisionPlayerTwoMovement.value -> {
                     gameState.ballStartOffsetX.value - 650f
                 }
                 gameState.rightCollisionMovement.value -> {

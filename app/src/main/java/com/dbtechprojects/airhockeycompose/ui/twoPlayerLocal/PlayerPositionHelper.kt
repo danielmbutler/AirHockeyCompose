@@ -46,7 +46,7 @@ object PlayerPositionHelper {
                 positionX = motionEvent.x
             }
 
-            if (playerTwoOffsetY.value > 90f && playerTwoOffsetY.value < 850f) {
+            if (playerTwoOffsetY.value > 90f && playerTwoOffsetY.value < 900f) {
                 positionY = motionEvent.y
             } else if (playerTwoOffsetY.value > 850f && motionEvent.y < playerTwoOffsetY.value) {
                 positionY = motionEvent.y
@@ -85,7 +85,7 @@ object PlayerPositionHelper {
                     positionX = secondPointerX
                 }
 
-                if (playerTwoOffsetY.value > 90f && playerTwoOffsetY.value < 850f) {
+                if (playerTwoOffsetY.value > 90f && playerTwoOffsetY.value < 900f) {
                     positionY = secondPointerY
                 } else if (playerTwoOffsetY.value > 850f && secondPointerY < playerTwoOffsetY.value
                 ) {
