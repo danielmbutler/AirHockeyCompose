@@ -25,6 +25,7 @@ import androidx.compose.ui.zIndex
 import com.dbtechprojects.airhockeycompose.ui.shared.GameState
 import com.dbtechprojects.airhockeycompose.ui.shared.drawGameBoard
 import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions
+import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions.setMovementConditionsToFalse
 
 
 @Composable
@@ -53,13 +54,14 @@ fun GameBoard(playerVsCpuState: () -> Unit,
               ) {
 
 
+    // get list of movement conditions to loop through and change later
+    val movementConditions = SharedGameFunctions.getMovementConditions(gameState)
+
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
+        setMovementConditionsToFalse(movementConditions)
+        gameState.playerOneOffsetY.value = gameState.playerOneStartOffsetY.value
+        gameState.playerOneOffsetX.value = gameState.playerOneStartOffsetX.value
         gameState.endGame.value = true
-        gameState.downCollisionMovement.value = false
-        gameState.goalCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.upCollisionMovement.value = false
     }
 
     // define collision checks
@@ -159,10 +161,7 @@ fun GameBoard(playerVsCpuState: () -> Unit,
 
     if (player1goalCheck || player2goalCheck) {
 //        Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.goalCollisionMovement.value = true
         if (player1goalCheck) {
             gameState.player1Goal.value = true
@@ -175,28 +174,20 @@ fun GameBoard(playerVsCpuState: () -> Unit,
     }
 
     if (upCollision && !gameState.goalCollisionMovement.value) {
+        setMovementConditionsToFalse(movementConditions)
         gameState.upCollisionMovement.value = true
-        gameState.downCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
 
     }
     if (downCollision && !gameState.goalCollisionMovement.value) {
+        setMovementConditionsToFalse(movementConditions)
         gameState.downCollisionMovement.value = true
-        gameState.upCollisionMovement.value = false
-        gameState.leftCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
     }
     if (leftCollision && !gameState.goalCollisionMovement.value) {
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
-        gameState.rightCollisionMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.leftCollisionMovement.value = true
     }
     if (rightCollision && !gameState.goalCollisionMovement.value) {
-        gameState.leftCollisionMovement.value = false
-        gameState.upCollisionMovement.value = false
-        gameState.downCollisionMovement.value = false
+        setMovementConditionsToFalse(movementConditions)
         gameState.rightCollisionMovement.value = true
     }
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,8 +56,6 @@ fun TwoPlayerGameBoard(
         gameState.playerOneOffsetX.value = gameState.playerOneStartOffsetX.value
         gameState.endGame.value = true
     }
-
-
 
     // define collision checks
 
