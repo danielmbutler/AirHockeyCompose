@@ -80,13 +80,13 @@ fun MainScreen(
 
             when (gameTypeState.value) {
                 GameTypeState.INITIAL -> {
-                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal, gameTypeState)
+                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
                 GameTypeState.PLAYER_VS_CPU -> {
-                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal, gameTypeState)
+                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
                 GameTypeState.TWO_PLAYER_LOCAL -> {
-                    TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal, gameTypeState)
+                    TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
             }
 

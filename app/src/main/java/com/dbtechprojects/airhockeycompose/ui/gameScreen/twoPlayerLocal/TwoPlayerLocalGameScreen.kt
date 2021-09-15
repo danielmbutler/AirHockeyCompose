@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameMenu
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameState
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameTypeState
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.SharedGameFunctions
 import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.PlayerPositionHelper.getPlayerOnePosition
@@ -37,11 +35,9 @@ fun TwoPlayerGameBoard(
     playerVsCpuState: () -> Unit,
     gameState: GameState,
     twoPlayerLocal: () -> Unit,
-    gameTypeState: MutableState<GameTypeState>
 ) {
     // setting out initial positions
 
-    val playerVsCpuOffset = Offset(gameState.playerTwoOffsetX, gameState.playerTwoOffsetY)
     val playerTwoOffsetX = remember { mutableStateOf(gameState.playerTwoOffsetX) }
     val playerTwoOffsetY = remember { mutableStateOf(gameState.playerTwoOffsetY) }
 
@@ -263,16 +259,12 @@ fun TwoPlayerGameBoard(
                 drawCircle(
                     color = Color.Red,
                     radius = 100f,
-                    center = when (gameTypeState.value) {
-                        GameTypeState.PLAYER_VS_CPU -> playerVsCpuOffset
-                        GameTypeState.TWO_PLAYER_LOCAL -> Offset(
-                            playerTwoOffsetX.value,
-                            playerTwoOffsetY.value
-                        )
-                        else -> playerVsCpuOffset
-                    }
+                    center = Offset(
+                        playerTwoOffsetX.value,
+                        playerTwoOffsetY.value
+                    )
                 )
-                //Offset(width/2, height - 100f),
+
                 drawCircle(
                     color = Color.Blue,
                     radius = 100f,

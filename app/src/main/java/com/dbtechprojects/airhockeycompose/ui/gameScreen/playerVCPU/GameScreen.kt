@@ -49,7 +49,7 @@ fun GameTitle(text: String) {
 fun GameBoard(playerVsCpuState: () -> Unit,
               gameState: GameState,
               twoPlayerLocal: () -> Unit,
-              gameTypeState: MutableState<GameTypeState>) {
+              ) {
 
 
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
