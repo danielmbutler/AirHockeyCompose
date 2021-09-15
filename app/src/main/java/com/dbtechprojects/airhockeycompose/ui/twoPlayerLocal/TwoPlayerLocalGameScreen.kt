@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal
+package com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal
 
 import android.graphics.Typeface
 import android.util.Range
@@ -22,12 +22,12 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameMenu
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.GameState
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.SharedGameFunctions
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.PlayerPositionHelper.getPlayerOnePosition
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.PlayerPositionHelper.getPlayerTwoPosition
+import com.dbtechprojects.airhockeycompose.ui.playerVCPU.GameMenu
+import com.dbtechprojects.airhockeycompose.ui.shared.GameState
+import com.dbtechprojects.airhockeycompose.ui.shared.drawGameBoard
+import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.PlayerPositionHelper.getPlayerOnePosition
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.PlayerPositionHelper.getPlayerTwoPosition
 
 @ExperimentalComposeUiApi
 @Composable

@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU
+package com.dbtechprojects.airhockeycompose.ui.playerVCPU
 
 import android.graphics.Typeface
 import android.util.Log
@@ -22,8 +22,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.drawGameBoard
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.shared.SharedGameFunctions
+import com.dbtechprojects.airhockeycompose.ui.shared.GameState
+import com.dbtechprojects.airhockeycompose.ui.shared.drawGameBoard
+import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions
 
 
 @Composable

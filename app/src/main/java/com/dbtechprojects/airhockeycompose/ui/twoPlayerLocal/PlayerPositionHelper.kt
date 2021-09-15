@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal
+package com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal
 
 import android.util.Log
 import android.util.Range

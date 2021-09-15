@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose.ui.gameScreen.shared
+package com.dbtechprojects.airhockeycompose.ui.shared
 
 
 object SharedGameFunctions {

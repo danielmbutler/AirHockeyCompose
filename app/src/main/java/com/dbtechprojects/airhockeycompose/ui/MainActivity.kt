@@ -1,4 +1,4 @@
-package com.dbtechprojects.airhockeycompose
+package com.dbtechprojects.airhockeycompose.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -13,8 +13,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.playerVCPU.*
-import com.dbtechprojects.airhockeycompose.ui.gameScreen.twoPlayerLocal.TwoPlayerGameBoard
+import com.dbtechprojects.airhockeycompose.ui.playerVCPU.*
+import com.dbtechprojects.airhockeycompose.ui.shared.GameState
+import com.dbtechprojects.airhockeycompose.ui.shared.GameTypeState
+import com.dbtechprojects.airhockeycompose.ui.shared.playerVsCpuState
+import com.dbtechprojects.airhockeycompose.ui.shared.twoPlayerLocalState
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.TwoPlayerGameBoard
 import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
 
 class MainActivity : ComponentActivity() {
