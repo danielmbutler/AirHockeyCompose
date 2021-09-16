@@ -1,0 +1,26 @@
+{
+  "name": "airhockeycompose",
+  "version": "1.0.0",
+  "description": "air hockey multiplayer game created in jetpack compose",
+  "main": "Server.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "socket.io": "^4.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielmbutler/AirHockeyCompose.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danielmbutler/AirHockeyCompose/issues"
+  },
+  "homepage": "https://github.com/danielmbutler/AirHockeyCompose#readme"
+}

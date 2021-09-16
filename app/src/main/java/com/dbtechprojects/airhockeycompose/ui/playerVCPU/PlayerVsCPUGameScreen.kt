@@ -348,7 +348,8 @@ fun GameBoard(playerVsCpuState: () -> Unit,
 fun GameMenu(
     playerVsCpuState: () -> Unit,
     onGameButtonClick: () -> Unit,
-    twoPlayerLocal: () -> Unit
+    twoPlayerLocal: () -> Unit,
+    twoPlayerOnline: () -> Unit
 ) {
 
     Box(
@@ -388,7 +389,10 @@ fun GameMenu(
                     Text(text = "Two Player Local")
                 }
                 Button(
-                    onClick = { onGameButtonClick.invoke() },
+                    onClick = {
+                        twoPlayerOnline.invoke()
+                        onGameButtonClick.invoke()
+                              },
                     Modifier
                         .padding(10.dp)
                         .width(180.dp)

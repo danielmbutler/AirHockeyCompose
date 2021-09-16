@@ -8,6 +8,7 @@ import org.json.JSONObject
 object GameEventListener : SocketListener {
     override fun emit(event: String, data: JSONObject) {
         SocketHandler.getSocket().emit(event, "test")
+        Log.d("sending" , event + SocketHandler.getSocket().id())
     }
 
     override fun receive(args: Array<Any>) {

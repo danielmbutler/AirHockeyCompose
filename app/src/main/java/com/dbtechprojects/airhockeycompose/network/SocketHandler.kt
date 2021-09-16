@@ -1,5 +1,6 @@
 package com.dbtechprojects.airhockeycompose.network
 
+import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
@@ -19,11 +20,11 @@ object SocketHandler {
 // "http://localhost:3000/" will not work
 // If you want to use your physical phone you could use the your ip address plus :3000
 // This will allow your Android Emulator and physical device at your home to connect to the server
-            mSocket = IO.socket("http://10.0.2.2:3000")
-            mSocket.emit("connection", JSONObject().put("test", "test"))
+    Log.d("sockHandler", "setting Socket" )
+            mSocket = IO.socket("http://192.168.1.156:3000")
 
         } catch (e: URISyntaxException) {
-
+            e.printStackTrace()
         }
     }
 
@@ -34,7 +35,10 @@ object SocketHandler {
 
     @Synchronized
     fun establishConnection() {
+
         mSocket.connect()
+        Log.d("sockHandler", "connection : ${mSocket.connected()}" )
+        mSocket.emit("connection", JSONObject().put("test", "test"))
     }
 
     @Synchronized
