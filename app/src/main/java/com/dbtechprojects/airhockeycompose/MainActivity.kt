@@ -12,6 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.dbtechprojects.airhockeycompose.network.SocketHandler
+import com.dbtechprojects.airhockeycompose.network.SocketHandler.establishConnection
+import com.dbtechprojects.airhockeycompose.network.SocketHandler.getSocket
+import com.dbtechprojects.airhockeycompose.network.SocketHandler.setSocket
 import com.dbtechprojects.airhockeycompose.ui.playerVCPU.*
 import com.dbtechprojects.airhockeycompose.ui.shared.GameState
 import com.dbtechprojects.airhockeycompose.ui.shared.GameTypeState
@@ -19,6 +23,8 @@ import com.dbtechprojects.airhockeycompose.ui.playerVCPU.playerVsCpuState
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.twoPlayerLocalState
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.TwoPlayerGameBoard
 import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.GameEventListener
+import io.socket.client.Socket
 
 class MainActivity : ComponentActivity() {
 
@@ -46,6 +52,10 @@ class MainActivity : ComponentActivity() {
                     GameTypeState.TWO_PLAYER_LOCAL -> {
                         gameState.value = twoPlayerLocalState(gameState = gameState.value)
                     }
+                    GameTypeState.TWO_PLAYER_ONLINE -> {
+                        setSocket(GameEventListener)
+                        establishConnection()
+                    }
                 }
 
                 MainScreen(
@@ -60,6 +70,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        SocketHandler.closeConnection()
     }
 }
 

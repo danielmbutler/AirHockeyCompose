@@ -38,7 +38,8 @@ data class GameState(
 enum class GameTypeState {
     INITIAL,
     PLAYER_VS_CPU,
-    TWO_PLAYER_LOCAL
+    TWO_PLAYER_LOCAL,
+    TWO_PLAYER_ONLINE
 }
 
 
