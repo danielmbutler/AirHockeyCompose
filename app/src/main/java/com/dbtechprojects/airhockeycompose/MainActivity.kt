@@ -3,6 +3,7 @@ package com.dbtechprojects.airhockeycompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
                         gameState.value = twoPlayerLocalState(gameState = gameState.value)
                     }
                     GameTypeState.TWO_PLAYER_ONLINE -> {
-                        setSocket(GameEventListener)
+                        setSocket()
                         establishConnection()
                     }
                 }
@@ -93,7 +94,7 @@ fun MainScreen(
             .fillMaxSize()
     ) {
 
-        Column(Modifier.padding(10.dp)) {
+        Box(Modifier.padding(10.dp)) {
 
             when (gameTypeState.value) {
                 GameTypeState.INITIAL -> {
@@ -105,6 +106,13 @@ fun MainScreen(
                 GameTypeState.TWO_PLAYER_LOCAL -> {
                     TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
+            }
+
+            if (!gameState.value.menuState.value) {
+                GameMenu(
+                    playerVsCpuState = playerVsCpu,
+                    twoPlayerLocal = twoPlayerLocal,
+                    onGameButtonClick = { gameState.value.menuState.value = true })
             }
         }
 

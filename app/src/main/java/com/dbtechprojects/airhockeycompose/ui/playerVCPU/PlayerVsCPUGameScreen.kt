@@ -339,12 +339,7 @@ fun GameBoard(playerVsCpuState: () -> Unit,
 
             }
         }
-        if (!gameState.menuState.value) {
-            GameMenu(
-                playerVsCpuState = playerVsCpuState,
-                twoPlayerLocal = twoPlayerLocal,
-                onGameButtonClick = { gameState.menuState.value = true })
-        }
+
     }
 
 }
