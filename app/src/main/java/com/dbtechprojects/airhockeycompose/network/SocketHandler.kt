@@ -3,7 +3,9 @@ package com.dbtechprojects.airhockeycompose.network
 import android.util.Log
 import io.socket.client.IO
 import io.socket.client.Socket
+import io.socket.engineio.client.EngineIOException
 import org.json.JSONObject
+import java.net.URI
 import java.net.URISyntaxException
 
 
@@ -16,15 +18,31 @@ object SocketHandler {
     @Synchronized
     fun setSocket() {
         try {
-// "http://10.0.2.2:3000" is the network your Android emulator must use to join the localhost network on your computer
-// "http://localhost:3000/" will not work
-// If you want to use your physical phone you could use the your ip address plus :3000
-// This will allow your Android Emulator and physical device at your home to connect to the server
-    Log.d("sockHandler", "setting Socket" )
+    Log.d("socketHandler", "setting Socket" )
             mSocket = IO.socket("http://192.168.1.156:3000")
 
-        } catch (e: URISyntaxException) {
-            e.printStackTrace()
+            mSocket.on(Socket.EVENT_CONNECT_ERROR){
+                Log.d("SocketHandler" ,"Connection Error : ${it}")
+                it.forEach { item ->
+                    val exception = item as EngineIOException
+                    print(exception.message + " " + exception.code + " " + exception.cause)
+                }
+            }
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT){
+                Log.d("SocketHandler", "TimeOut Error : $it")
+            }
+            establishConnection()
+
+        } catch (e: Exception) {
+            when(e){
+               is  URISyntaxException -> e.printStackTrace()
+               is  EngineIOException -> {
+                   Log.d("EngineException", "${e.code}, ${e.transport}, ${e.message}")
+                   e.printStackTrace()
+               }
+                else -> e.printStackTrace()
+            }
+
         }
     }
 
@@ -37,8 +55,8 @@ object SocketHandler {
     fun establishConnection() {
 
         mSocket.connect()
-        Log.d("sockHandler", "connection : ${mSocket.connected()}" )
-        mSocket.emit("connection", JSONObject().put("test", "test"))
+        Log.d("socketHandler", "connection : ${mSocket.connected()}" )
+        mSocket.emit("connection")
     }
 
     @Synchronized

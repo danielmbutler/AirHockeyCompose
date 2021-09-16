@@ -12,7 +12,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dbtechprojects.airhockeycompose.network.SocketHandler
-import com.dbtechprojects.airhockeycompose.network.SocketHandler.establishConnection
 import com.dbtechprojects.airhockeycompose.network.SocketHandler.setSocket
 import com.dbtechprojects.airhockeycompose.ui.playerVCPU.*
 import com.dbtechprojects.airhockeycompose.ui.shared.GameState
@@ -53,7 +52,6 @@ class MainActivity : ComponentActivity() {
                     }
                     GameTypeState.TWO_PLAYER_ONLINE -> {
                         setSocket()
-                        establishConnection()
                     }
                 }
 
