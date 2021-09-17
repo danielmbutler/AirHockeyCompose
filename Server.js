@@ -11,12 +11,30 @@ server.listen(3000, ()=>{
 wsServer = new SocketServer({httpServer:server})
 
 const connections = []
+const players = []
 
 wsServer.on('request', (req) => {
     const connection = req.accept()
     console.log('new connection')
    
       connections.push(connection)
+
+      if(connections.length > 1){
+        connections.forEach(element => {
+          element.sendUTF("paired")
+          element.sendUTF(players.toString())
+        })
+      }
+
+
+    connection.on('name', (name) => {
+      const player = {
+        name: name,
+        index: connections.indexOf(connection)
+      }
+      players.push(player)
+      console.log("players: " + players)
+    })
     
    
     connection.on('message', (mes) => {

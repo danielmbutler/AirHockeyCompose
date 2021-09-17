@@ -20,14 +20,14 @@ class SocketListener(private val gameEventViewModel: GameEventViewModel): WebSoc
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         Log.d("SocketListener" , response.toString())
-        webSocket.send("hello")
+        gameEventViewModel.receiveGameEvent("Connected searching for game ...")
 
 
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
-
+        gameEventViewModel.onConnectionError(t.message)
         t.printStackTrace()
     }
 }

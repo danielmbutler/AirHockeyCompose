@@ -48,10 +48,7 @@ fun GameTitle(text: String) {
 
 
 @Composable
-fun GameBoard(playerVsCpuState: () -> Unit,
-              gameState: GameState,
-              twoPlayerLocal: () -> Unit,
-              ) {
+fun GameBoard(gameState: GameState,) {
 
 
     // get list of movement conditions to loop through and change later

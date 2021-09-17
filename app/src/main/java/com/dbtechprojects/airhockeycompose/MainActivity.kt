@@ -23,6 +23,14 @@ import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.GameEventViewModel
 import android.content.Intent
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.TwoPlayerOnlineGameMenu
 import com.google.android.gms.security.ProviderInstaller
 
 
@@ -40,6 +48,8 @@ class MainActivity : ComponentActivity() {
             Injection.provideViewModelFactory()
         ).get(GameEventViewModel::class.java)
 
+        //Install ssl if needed
+        // https://stackoverflow.com/questions/53583016/api-call-on-android-19-emulator-isconnected-failed-ehostunreach-no-route-to
         ProviderInstaller.installIfNeededAsync(this, object :
             ProviderInstaller.ProviderInstallListener {
             override fun onProviderInstalled() {}
@@ -67,7 +77,6 @@ class MainActivity : ComponentActivity() {
                     }
                     GameTypeState.TWO_PLAYER_ONLINE -> {
 
-                        setSocket(gameEventViewModel)
                     }
                 }
 
@@ -105,7 +114,7 @@ fun MainScreen(
     twoPlayerLocal: () -> Unit,
     twoPlayerOnline: () -> Unit,
     gameState: MutableState<GameState>,
-    viewModel: GameEventViewModel?,
+    viewModel: GameEventViewModel,
     gameTypeState: MutableState<GameTypeState>
 ) {
 
@@ -119,37 +128,20 @@ fun MainScreen(
 
             when (gameTypeState.value) {
                 GameTypeState.INITIAL -> {
-                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
+                    GameBoard(gameState.value)
                 }
                 GameTypeState.PLAYER_VS_CPU -> {
-                    GameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
+                    GameBoard(gameState.value)
                 }
                 GameTypeState.TWO_PLAYER_LOCAL -> {
                     TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
                 GameTypeState.TWO_PLAYER_ONLINE -> {
-                    viewModel?.let {
-
-                        var messageToSend = ""
-                        val messages: String by it.gameEvents.collectAsState()
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(6.dp)) {
-                            TextField(
-                                value = "type message to send",
-                                onValueChange = { messageToSend = it })
-
-                            Button(onClick = { viewModel.sendGameEvent(messageToSend) }) {
-                                Text(text = "test")
-
-                            }
-
-                            Text(text = "received : $messages")
-
-                        }
-
+                    TwoPlayerOnlineGameMenu(gameState = gameState, viewModel = viewModel) {
+                        setSocket(
+                            viewModel
+                        )
                     }
-
                 }
             }
 
