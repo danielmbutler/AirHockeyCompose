@@ -1,11 +1,9 @@
 package com.dbtechprojects.airhockeycompose.network
 
 import android.util.Log
-import io.socket.client.IO
-import io.socket.client.Socket
-import io.socket.engineio.client.EngineIOException
-import org.json.JSONObject
-import java.net.URI
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.WebSocket
 import java.net.URISyntaxException
 
 
@@ -13,33 +11,22 @@ import java.net.URISyntaxException
 
 object SocketHandler {
 
-    lateinit var mSocket: Socket
+    lateinit var mSocket: WebSocket
+    private var SERVER_PATH = "ws://192.168.1.156:3000"
 
     @Synchronized
     fun setSocket() {
         try {
     Log.d("socketHandler", "setting Socket" )
-            mSocket = IO.socket("http://192.168.1.156:3000")
+            val client = OkHttpClient()
+            val request = Request.Builder().url(SERVER_PATH).build()
+            mSocket = client.newWebSocket(request, SocketListener)
 
-            mSocket.on(Socket.EVENT_CONNECT_ERROR){
-                Log.d("SocketHandler" ,"Connection Error : ${it}")
-                it.forEach { item ->
-                    val exception = item as EngineIOException
-                    print(exception.message + " " + exception.code + " " + exception.cause)
-                }
-            }
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT){
-                Log.d("SocketHandler", "TimeOut Error : $it")
-            }
-            establishConnection()
 
         } catch (e: Exception) {
             when(e){
                is  URISyntaxException -> e.printStackTrace()
-               is  EngineIOException -> {
-                   Log.d("EngineException", "${e.code}, ${e.transport}, ${e.message}")
-                   e.printStackTrace()
-               }
+
                 else -> e.printStackTrace()
             }
 
@@ -47,20 +34,7 @@ object SocketHandler {
     }
 
     @Synchronized
-    fun getSocket(): Socket {
-        return mSocket
-    }
-
-    @Synchronized
-    fun establishConnection() {
-
-        mSocket.connect()
-        Log.d("socketHandler", "connection : ${mSocket.connected()}" )
-        mSocket.emit("connection")
-    }
-
-    @Synchronized
     fun closeConnection() {
-        if(this::mSocket.isInitialized) mSocket.disconnect()
+        if(this::mSocket.isInitialized) mSocket.close(1, "")
     }
 }

@@ -63,9 +63,6 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
-    //socket.io
-    //Socket.io
-    implementation('io.socket:socket.io-client:1.0.0') {
-        exclude group: 'org.json', module: 'json'
-    }
+    // socket-client
+    implementation "com.squareup.okhttp3:okhttp:4.9.1"
 }

@@ -20,7 +20,6 @@ import com.dbtechprojects.airhockeycompose.ui.playerVCPU.playerVsCpuState
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.twoPlayerLocalState
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.TwoPlayerGameBoard
 import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
-import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.GameEventListener
 import org.json.JSONObject
 
 
@@ -109,7 +108,7 @@ fun MainScreen(
                     TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
                 GameTypeState.TWO_PLAYER_ONLINE -> {
-                    Button(onClick = {GameEventListener.emit("test", JSONObject())}) {
+                    Button(onClick = {}) {
                         Text(text = "test")
                     }
                 }
