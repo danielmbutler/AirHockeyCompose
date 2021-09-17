@@ -15,14 +15,16 @@ const connections = []
 wsServer.on('request', (req) => {
     const connection = req.accept()
     console.log('new connection')
-    if(connections.length < 2){
+   
       connections.push(connection)
-    } else console.log("max connections")
-    console.log(connections)
+    
+   
     connection.on('message', (mes) => {
     console.log(mes)
+   
         connections.forEach(element => {
             if (element != connection)
+                console.log("sending message")
                 element.sendUTF(mes.utf8Data)
         })
     })

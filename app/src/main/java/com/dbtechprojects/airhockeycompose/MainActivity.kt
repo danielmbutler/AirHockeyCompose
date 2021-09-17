@@ -3,14 +3,14 @@ package com.dbtechprojects.airhockeycompose
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
+import com.dbtechprojects.airhockeycompose.di.Injection
 import com.dbtechprojects.airhockeycompose.network.SocketHandler
 import com.dbtechprojects.airhockeycompose.network.SocketHandler.setSocket
 import com.dbtechprojects.airhockeycompose.ui.playerVCPU.*
@@ -20,17 +20,33 @@ import com.dbtechprojects.airhockeycompose.ui.playerVCPU.playerVsCpuState
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.twoPlayerLocalState
 import com.dbtechprojects.airhockeycompose.ui.twoPlayerLocal.TwoPlayerGameBoard
 import com.dbtechprojects.airhockeycompose.ui.theme.AirHockeyComposeTheme
-import org.json.JSONObject
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.GameEventViewModel
+import android.content.Intent
+import android.util.Log
+import com.google.android.gms.security.ProviderInstaller
 
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var gameState: MutableState<GameState>
     private lateinit var gameTypeState: MutableState<GameTypeState>
+    private lateinit var gameEventViewModel: GameEventViewModel
 
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        gameEventViewModel = ViewModelProvider(
+            this,
+            Injection.provideViewModelFactory()
+        ).get(GameEventViewModel::class.java)
+
+        ProviderInstaller.installIfNeededAsync(this, object :
+            ProviderInstaller.ProviderInstallListener {
+            override fun onProviderInstalled() {}
+            override fun onProviderInstallFailed(i: Int, intent: Intent?) {
+                Log.i("main", "Provider install failed ($i) : SSL Problems may occurs")
+            }
+        })
         setContent {
             AirHockeyComposeTheme {
                 // A surface container using the 'background' color from the theme
@@ -50,11 +66,13 @@ class MainActivity : ComponentActivity() {
                         gameState.value = twoPlayerLocalState(gameState = gameState.value)
                     }
                     GameTypeState.TWO_PLAYER_ONLINE -> {
-                        setSocket()
+
+                        setSocket(gameEventViewModel)
                     }
                 }
 
-                MainScreen( playerVsCpu =
+                MainScreen(
+                    playerVsCpu =
                     {
                         gameTypeState.value = GameTypeState.PLAYER_VS_CPU
                     },
@@ -66,8 +84,9 @@ class MainActivity : ComponentActivity() {
                     {
                         gameTypeState.value = GameTypeState.TWO_PLAYER_ONLINE
                     },
-                    gameState,
-                    gameTypeState
+                    gameState = gameState,
+                    gameTypeState = gameTypeState,
+                    viewModel = gameEventViewModel
                 )
             }
         }
@@ -86,6 +105,7 @@ fun MainScreen(
     twoPlayerLocal: () -> Unit,
     twoPlayerOnline: () -> Unit,
     gameState: MutableState<GameState>,
+    viewModel: GameEventViewModel?,
     gameTypeState: MutableState<GameTypeState>
 ) {
 
@@ -108,9 +128,28 @@ fun MainScreen(
                     TwoPlayerGameBoard(playerVsCpu, gameState.value, twoPlayerLocal)
                 }
                 GameTypeState.TWO_PLAYER_ONLINE -> {
-                    Button(onClick = {}) {
-                        Text(text = "test")
+                    viewModel?.let {
+
+                        var messageToSend = ""
+                        val messages: String by it.gameEvents.collectAsState()
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp)) {
+                            TextField(
+                                value = "type message to send",
+                                onValueChange = { messageToSend = it })
+
+                            Button(onClick = { viewModel.sendGameEvent(messageToSend) }) {
+                                Text(text = "test")
+
+                            }
+
+                            Text(text = "received : $messages")
+
+                        }
+
                     }
+
                 }
             }
 

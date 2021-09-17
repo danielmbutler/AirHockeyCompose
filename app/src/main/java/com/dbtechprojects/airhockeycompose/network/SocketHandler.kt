@@ -1,6 +1,7 @@
 package com.dbtechprojects.airhockeycompose.network
 
 import android.util.Log
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.GameEventViewModel
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.WebSocket
@@ -15,12 +16,12 @@ object SocketHandler {
     private var SERVER_PATH = "ws://192.168.1.156:3000"
 
     @Synchronized
-    fun setSocket() {
+    fun setSocket(viewModel: GameEventViewModel) {
         try {
     Log.d("socketHandler", "setting Socket" )
             val client = OkHttpClient()
             val request = Request.Builder().url(SERVER_PATH).build()
-            mSocket = client.newWebSocket(request, SocketListener)
+            mSocket = client.newWebSocket(request, SocketListener(viewModel))
 
 
         } catch (e: Exception) {
@@ -31,6 +32,10 @@ object SocketHandler {
             }
 
         }
+    }
+
+    fun getSocket(): WebSocket {
+        return mSocket
     }
 
     @Synchronized
