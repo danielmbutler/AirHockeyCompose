@@ -72,7 +72,11 @@ dependencies {
     // socket-client
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
 
+    // coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
+
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.6'
 
 
 }

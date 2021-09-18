@@ -1,14 +1,15 @@
 package com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline
 
 
-import android.widget.Toast
-import androidx.compose.runtime.MutableState
+import android.util.Log
+import androidx.compose.material.contentColorFor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dbtechprojects.airhockeycompose.di.DispatcherProvider
 import com.dbtechprojects.airhockeycompose.network.SocketHandler
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.models.Mappers
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.state.ConnectionState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
@@ -16,18 +17,39 @@ import org.json.JSONObject
 
 class GameEventViewModel(private val dispatcherProvider: DispatcherProvider) : ViewModel() {
 
-    private var _gameEvents = MutableStateFlow("")
-    val gameEvents : StateFlow<String>
+    private var _gameEvents = MutableSharedFlow<String>(0)
+    val gameEvents : MutableSharedFlow<String>
         get() = _gameEvents
 
-    var gameFound = false
+    var name = ""
+
+    private var _connectionState = MutableSharedFlow<ConnectionState>()
+    val connectionState : MutableSharedFlow<ConnectionState>
+        get() = _connectionState
+
+
 
     // called from socket listener
     fun receiveGameEvent(text: String) {
         viewModelScope.launch(dispatcherProvider.io) {
+            val connectionState = ConnectionState()
             _gameEvents.emit(text)
-            if (text == "paired"){
-                gameFound = true
+            if (text.startsWith("connection confirmed : ")){
+
+                connectionState.playerOne =  Mappers.jsonToPlayerObject(text.substringAfter("connection confirmed : "))
+                _connectionState.emit(connectionState)
+                Log.d("viewmodel", "player found: $connectionState.playerOne")
+            }
+            if(text.startsWith("paired")){
+                connectionState.playerList = Mappers.jsonToPlayerObjectList(text.substringAfter("paired : "))
+                Log.d("viewmodel", "players found: ${connectionState.playerList}")
+                connectionState.playerList.forEach {
+                    if (it.index != connectionState.playerOne.index){
+                        connectionState.playerTwo = it
+                    }
+                }
+                connectionState.gameFound = true
+                _connectionState.emit(connectionState)
             }
         }
     }
@@ -36,7 +58,6 @@ class GameEventViewModel(private val dispatcherProvider: DispatcherProvider) : V
         val jsonObject = JSONObject()
         try {
             jsonObject.put("name", text)
-            jsonObject.put("message", text)
             SocketHandler.getSocket().send(jsonObject.toString())
         } catch (e: JSONException) {
             e.printStackTrace()

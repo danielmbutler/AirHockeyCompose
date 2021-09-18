@@ -1,61 +1,44 @@
-package com.dbtechprojects.airhockeycompose.ui.playerVCPU
+package com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.composables
 
 import android.graphics.Typeface
-import android.util.Log
 import android.util.Range
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.dbtechprojects.airhockeycompose.ui.shared.GameState
-import com.dbtechprojects.airhockeycompose.ui.shared.drawGameBoard
 import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions
-import com.dbtechprojects.airhockeycompose.ui.shared.SharedGameFunctions.setMovementConditionsToFalse
-
-
-@Composable
-fun GameTitle(text: String) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-        )
-    }
-}
-
+import com.dbtechprojects.airhockeycompose.ui.shared.drawGameBoard
+import com.dbtechprojects.airhockeycompose.ui.twoPlayerOnline.state.ConnectionState
 
 @Composable
-fun GameBoard(gameState: GameState,) {
+fun TwoPlayerOnlineGameBoard(gameState: GameState, connectionState: ConnectionState) {
 
+
+    // get player details
 
     // get list of movement conditions to loop through and change later
     val movementConditions = SharedGameFunctions.getMovementConditions(gameState)
 
     if (gameState.player1GoalCount.value > 4 || gameState.player2GoalCount.value > 4) {
-        setMovementConditionsToFalse(movementConditions)
+        SharedGameFunctions.setMovementConditionsToFalse(movementConditions)
         gameState.playerOneOffsetY.value = gameState.playerOneStartOffsetY.value
         gameState.playerOneOffsetX.value = gameState.playerOneStartOffsetX.value
         gameState.endGame.value = true
@@ -158,7 +141,7 @@ fun GameBoard(gameState: GameState,) {
 
     if (player1goalCheck || player2goalCheck) {
 //        Log.d("Game Board", "GOALLLLLLLL $goalCollisionMovement")
-        setMovementConditionsToFalse(movementConditions)
+        SharedGameFunctions.setMovementConditionsToFalse(movementConditions)
         gameState.goalCollisionMovement.value = true
         if (player1goalCheck) {
             gameState.player1Goal.value = true
@@ -171,20 +154,20 @@ fun GameBoard(gameState: GameState,) {
     }
 
     if (upCollision && !gameState.goalCollisionMovement.value) {
-        setMovementConditionsToFalse(movementConditions)
+        SharedGameFunctions.setMovementConditionsToFalse(movementConditions)
         gameState.upCollisionMovement.value = true
 
     }
     if (downCollision && !gameState.goalCollisionMovement.value) {
-        setMovementConditionsToFalse(movementConditions)
+        SharedGameFunctions.setMovementConditionsToFalse(movementConditions)
         gameState.downCollisionMovement.value = true
     }
     if (leftCollision && !gameState.goalCollisionMovement.value) {
-        setMovementConditionsToFalse(movementConditions)
+        SharedGameFunctions.setMovementConditionsToFalse(movementConditions)
         gameState.leftCollisionMovement.value = true
     }
     if (rightCollision && !gameState.goalCollisionMovement.value) {
-        setMovementConditionsToFalse(movementConditions)
+        SharedGameFunctions.setMovementConditionsToFalse(movementConditions)
         gameState.rightCollisionMovement.value = true
     }
 
@@ -303,13 +286,13 @@ fun GameBoard(gameState: GameState,) {
                 }
 
                 drawContext.canvas.nativeCanvas.drawText(
-                    gameState.player2GoalCount.value.toString(),
+                    connectionState.playerTwo.name + " " + gameState.player2GoalCount.value.toString(),
                     100f,
                     height / 2 - 200f,
                     paint
                 )
                 drawContext.canvas.nativeCanvas.drawText(
-                    gameState.player1GoalCount.value.toString(),
+                    connectionState.playerOne.name + " " + gameState.player1GoalCount.value.toString(),
                     100f,
                     height / 2 + 200f,
                     paint
@@ -339,65 +322,4 @@ fun GameBoard(gameState: GameState,) {
 
     }
 
-}
-
-@Composable
-fun GameMenu(
-    playerVsCpuState: () -> Unit,
-    onGameButtonClick: () -> Unit,
-    twoPlayerLocal: () -> Unit,
-    twoPlayerOnline: () -> Unit
-) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-            .background(color = Color(0f, 0f, 0f, 0.6f), shape = RectangleShape)
-    ) {
-        GameTitle(text = "Air Hockey Compose")
-        Row(
-            Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column() {
-
-                Button(
-                    onClick = {
-                        playerVsCpuState.invoke()
-                        onGameButtonClick.invoke()
-                    },
-                    Modifier
-                        .padding(10.dp)
-                        .width(180.dp)
-                ) {
-                    Text(text = "Single Player Local")
-                }
-                Button(
-                    onClick = {
-                        twoPlayerLocal.invoke()
-                        onGameButtonClick.invoke()
-                    },
-                    Modifier
-                        .padding(10.dp)
-                        .width(180.dp)
-                ) {
-                    Text(text = "Two Player Local")
-                }
-                Button(
-                    onClick = {
-                        twoPlayerOnline.invoke()
-                        onGameButtonClick.invoke()
-                              },
-                    Modifier
-                        .padding(10.dp)
-                        .width(180.dp)
-                ) {
-                    Text(text = "Two Player Online")
-                }
-            }
-
-        }
-    }
 }
