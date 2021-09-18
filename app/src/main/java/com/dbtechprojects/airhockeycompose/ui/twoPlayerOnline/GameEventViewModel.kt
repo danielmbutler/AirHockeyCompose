@@ -51,7 +51,7 @@ class GameEventViewModel(private val dispatcherProvider: DispatcherProvider) : V
                 }
                 gameState.gameFound = true
                 _connectionState.emit(gameState)
-                Log.d("viewmodel", "gamestate: $connectionState.playerOne")
+                Log.d("viewmodel", "gameState: $connectionState.playerOne")
             }
         }
     }
