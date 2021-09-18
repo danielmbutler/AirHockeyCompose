@@ -27,29 +27,31 @@ class GameEventViewModel(private val dispatcherProvider: DispatcherProvider) : V
     val connectionState : MutableSharedFlow<ConnectionState>
         get() = _connectionState
 
-
+    private val gameState = ConnectionState()
 
     // called from socket listener
     fun receiveGameEvent(text: String) {
         viewModelScope.launch(dispatcherProvider.io) {
-            val connectionState = ConnectionState()
+
             _gameEvents.emit(text)
             if (text.startsWith("connection confirmed : ")){
-
-                connectionState.playerOne =  Mappers.jsonToPlayerObject(text.substringAfter("connection confirmed : "))
-                _connectionState.emit(connectionState)
-                Log.d("viewmodel", "player found: $connectionState.playerOne")
+                if (gameState.playerOne.name.isEmpty()){
+                    gameState.playerOne =  Mappers.jsonToPlayerObject(text.substringAfter("connection confirmed : "))
+                    _connectionState.emit(gameState)
+                    Log.d("viewmodel", "player found: $connectionState.playerOne")
+                }
             }
             if(text.startsWith("paired")){
-                connectionState.playerList = Mappers.jsonToPlayerObjectList(text.substringAfter("paired : "))
-                Log.d("viewmodel", "players found: ${connectionState.playerList}")
-                connectionState.playerList.forEach {
-                    if (it.index != connectionState.playerOne.index){
-                        connectionState.playerTwo = it
+                gameState.playerList = Mappers.jsonToPlayerObjectList(text.substringAfter("paired : "))
+                Log.d("viewmodel", "players found: ${gameState.playerList}")
+                gameState.playerList.forEach {
+                    if (it.playerID != gameState.playerOne.playerID){
+                        gameState.playerTwo = it
                     }
                 }
-                connectionState.gameFound = true
-                _connectionState.emit(connectionState)
+                gameState.gameFound = true
+                _connectionState.emit(gameState)
+                Log.d("viewmodel", "gamestate: $connectionState.playerOne")
             }
         }
     }
